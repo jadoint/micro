@@ -6,9 +6,9 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi"
-	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/jadoint/micro/blog/model"
+	"github.com/jadoint/micro/clean"
 	"github.com/jadoint/micro/conn"
 	"github.com/jadoint/micro/errutil"
 	"github.com/jadoint/micro/logger"
@@ -69,10 +69,11 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 			logger.Panic(err.Error())
 		}
 		b.IDAuthor = visitor.ID
-		// Sanitize inputs against XSS attacks
-		strict := bluemonday.StrictPolicy()
+		// Strip title of all tags
+		strict := clean.Strict()
 		b.Title = strict.Sanitize(b.Title)
-		ugc := bluemonday.UGCPolicy()
+		// Sanitize post against XSS attacks
+		ugc := clean.UGC()
 		b.Post = ugc.Sanitize(b.Post)
 		b.WordCount = words.Count(&b.Post)
 
@@ -121,10 +122,11 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		}
 		b.ID = idBlog
 		b.IDAuthor = v.ID
-		// Sanitize inputs against XSS attacks
-		strict := bluemonday.StrictPolicy()
+		// Strip title of all tags
+		strict := clean.Strict()
 		b.Title = strict.Sanitize(b.Title)
-		ugc := bluemonday.UGCPolicy()
+		// Sanitize post against XSS attacks
+		ugc := clean.UGC()
 		b.Post = ugc.Sanitize(b.Post)
 		b.WordCount = words.Count(&b.Post)
 		b.Modified = now.MySQLUTC()
