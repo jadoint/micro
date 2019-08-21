@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/go-chi/chi"
+	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/jadoint/micro/blog/model"
 	"github.com/jadoint/micro/conn"
 	"github.com/jadoint/micro/errutil"
 	"github.com/jadoint/micro/logger"
+	"github.com/jadoint/micro/now"
 	"github.com/jadoint/micro/validate"
 	"github.com/jadoint/micro/visitor"
 	"github.com/jadoint/micro/words"
@@ -68,6 +69,11 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 			logger.Panic(err.Error())
 		}
 		b.IDAuthor = visitor.ID
+		// Sanitize inputs against XSS attacks
+		strict := bluemonday.StrictPolicy()
+		b.Title = strict.Sanitize(b.Title)
+		ugc := bluemonday.UGCPolicy()
+		b.Post = ugc.Sanitize(b.Post)
 		b.WordCount = words.Count(&b.Post)
 
 		// Validation
@@ -115,9 +121,13 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		}
 		b.ID = idBlog
 		b.IDAuthor = v.ID
+		// Sanitize inputs against XSS attacks
+		strict := bluemonday.StrictPolicy()
+		b.Title = strict.Sanitize(b.Title)
+		ugc := bluemonday.UGCPolicy()
+		b.Post = ugc.Sanitize(b.Post)
 		b.WordCount = words.Count(&b.Post)
-		loc, _ := time.LoadLocation("UTC")
-		b.Modified = time.Now().In(loc).Format("2006-01-02 15:04:05")
+		b.Modified = now.MySQLUTC()
 
 		// Validation
 		err = validate.Struct(b)

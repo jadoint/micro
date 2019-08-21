@@ -9,7 +9,8 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
+
+	"github.com/jadoint/micro/now"
 
 	"github.com/jadoint/micro/blog/model"
 	"github.com/jadoint/micro/conn"
@@ -186,7 +187,6 @@ func TestPostBlogSuccess(t *testing.T) {
 
 func TestUpdateBlogSuccess(t *testing.T) {
 	url := fmt.Sprintf("http://%s/%s/blog/6", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
-	loc, _ := time.LoadLocation("UTC")
 	want := &model.Blog{
 		ID:         6,
 		Title:      "Updated",
@@ -194,7 +194,7 @@ func TestUpdateBlogSuccess(t *testing.T) {
 		WordCount:  2,
 		IsUnlisted: true,
 		IsDraft:    true,
-		Modified:   time.Now().In(loc).Format("2006-01-02 15:04:05"),
+		Modified:   now.MySQLUTC(),
 	}
 	postFields := fmt.Sprintf(`{"title": "%s", "post": "%s", "isUnlisted": %t, "isDraft": %t}`, want.Title, want.Post, want.IsUnlisted, want.IsDraft)
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer([]byte(postFields)))
