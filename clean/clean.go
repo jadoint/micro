@@ -9,6 +9,14 @@ func UGC() *bluemonday.Policy {
 	ugc := bluemonday.UGCPolicy()
 	ugc.AllowAttrs("style").OnElements("span", "p", "div", "em", "i", "b", "strong")
 	ugc.RequireNoReferrerOnLinks(true)
+	// Permits the "dir", "id", "lang", "title" attributes globally
+	ugc.AllowStandardAttributes()
+	// Permits the "img" element and its standard attributes
+	ugc.AllowImages()
+	// Permits ordered and unordered lists, and also definition lists
+	ugc.AllowLists()
+	// Permits HTML tables and all applicable elements and non-styling attributes
+	ugc.AllowTables()
 	return ugc
 }
 
