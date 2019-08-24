@@ -14,7 +14,11 @@ import (
 )
 
 func TestLoginSuccess(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/auth/login", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/auth/login", listen, os.Getenv("START_PATH"))
 	username := "testuser1"
 	password := "test123"
 	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password)
@@ -54,7 +58,11 @@ func TestLoginSuccess(t *testing.T) {
 }
 
 func TestLoginBadPassword(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/auth/login", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/auth/login", listen, os.Getenv("START_PATH"))
 	username := "testuser1"
 	password := "badpassword"
 	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password)
@@ -77,7 +85,11 @@ func TestLoginBadPassword(t *testing.T) {
 }
 
 func TestLoginBadUsername(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/auth/login", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/auth/login", listen, os.Getenv("START_PATH"))
 	username := "badusername"
 	password := "test123"
 	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password)
@@ -100,7 +112,11 @@ func TestLoginBadUsername(t *testing.T) {
 }
 
 func TestLoginAlreadyLoggedIn(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/auth/login", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/auth/login", listen, os.Getenv("START_PATH"))
 	username := "testuser1"
 	password := "test123"
 	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s"}`, username, password)

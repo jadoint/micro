@@ -3,5 +3,5 @@ package route
 import "github.com/joho/godotenv"
 
 func init() {
-	godotenv.Load("../.env.testing")
+	godotenv.Load("../.env.test")
 }

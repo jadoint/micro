@@ -17,7 +17,11 @@ import (
 )
 
 func TestSignupSuccess(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/auth/signup", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/auth/signup", listen, os.Getenv("START_PATH"))
 	username := "TestSignupUser"
 	password := "test123"
 	confirmPassword := "test123"
@@ -92,7 +96,11 @@ func TestSignupSuccess(t *testing.T) {
 }
 
 func TestSignupBadUsername(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/auth/signup", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/auth/signup", listen, os.Getenv("START_PATH"))
 	username := "!@#$%^&*())_+"
 	password := "test123"
 	confirmPassword := "test123"
@@ -117,7 +125,11 @@ func TestSignupBadUsername(t *testing.T) {
 }
 
 func TestSignupBadPassword(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/auth/signup", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/auth/signup", listen, os.Getenv("START_PATH"))
 	username := "TestSignupBadPassword"
 	password := "123"
 	confirmPassword := "123"
@@ -142,7 +154,11 @@ func TestSignupBadPassword(t *testing.T) {
 }
 
 func TestSignupBadPasswordConfirmation(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/auth/signup", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/auth/signup", listen, os.Getenv("START_PATH"))
 	username := "TestSignupBadPasswordConfirmation"
 	password := "test123"
 	confirmPassword := "test1234"
@@ -167,7 +183,11 @@ func TestSignupBadPasswordConfirmation(t *testing.T) {
 }
 
 func TestSignupBadEmail(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/auth/signup", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/auth/signup", listen, os.Getenv("START_PATH"))
 	username := "TestSignupBadEmail"
 	password := "test123"
 	confirmPassword := "test123"
@@ -192,7 +212,11 @@ func TestSignupBadEmail(t *testing.T) {
 }
 
 func TestSignupAlreadyLoggedIn(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/auth/signup", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/auth/signup", listen, os.Getenv("START_PATH"))
 	username := "TestSignupUser"
 	password := "test123"
 	confirmPassword := "test123"

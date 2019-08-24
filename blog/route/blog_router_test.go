@@ -19,7 +19,11 @@ import (
 )
 
 func TestGetBlog(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/blog/1", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/blog/1", listen, os.Getenv("START_PATH"))
 	resp, err := http.Get(url)
 	if err != nil {
 		t.Errorf("TestGetBlog failed with error: %s", err.Error())
@@ -70,7 +74,11 @@ func TestGetBlog(t *testing.T) {
 }
 
 func TestGetBlogWithVisitor(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/blog/1", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/blog/1", listen, os.Getenv("START_PATH"))
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -111,7 +119,11 @@ func TestGetBlogWithVisitor(t *testing.T) {
 }
 
 func TestPostBlogSuccess(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/blog", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/blog", listen, os.Getenv("START_PATH"))
 	test := &model.Blog{
 		Title:      "<h1>Test Title</h1>",
 		Post:       "Test Post<script>alert('test')</script>",
@@ -203,7 +215,11 @@ func TestPostBlogSuccess(t *testing.T) {
 }
 
 func TestUpdateBlogSuccess(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/blog/6", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/blog/6", listen, os.Getenv("START_PATH"))
 	test := &model.Blog{
 		ID:         6,
 		Title:      "<h1>Updated</h1>",
@@ -318,6 +334,11 @@ func TestUpdateBlogSuccess(t *testing.T) {
 }
 
 func TestDeleteBlogSuccess(t *testing.T) {
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+
 	// DB setup
 	dbClient, err := db.GetClient()
 	if err != nil {
@@ -352,7 +373,7 @@ func TestDeleteBlogSuccess(t *testing.T) {
 	}
 
 	// Finally testing Delete API
-	url := fmt.Sprintf("http://%s/%s/blog/%d", os.Getenv("LISTEN"), os.Getenv("START_PATH"), idBlog)
+	url := fmt.Sprintf("http://%s/%s/blog/%d", listen, os.Getenv("START_PATH"), idBlog)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		t.Errorf("TestDeleteBlogSuccess failed with error: %s", err.Error())

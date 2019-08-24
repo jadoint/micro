@@ -11,7 +11,11 @@ import (
 )
 
 func TestGetRecent(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/blogs/recent/1", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/blogs/recent/1", listen, os.Getenv("START_PATH"))
 	resp, err := http.Get(url)
 	if err != nil {
 		t.Errorf("TestGetRecent failed with error: %s", err.Error())

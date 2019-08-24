@@ -10,7 +10,11 @@ import (
 )
 
 func TestLogoutSuccess(t *testing.T) {
-	url := fmt.Sprintf("http://%s/%s/auth/logout", os.Getenv("LISTEN"), os.Getenv("START_PATH"))
+	listen := os.Getenv("LISTEN")
+	if listen == "" {
+		t.Skip("Set LISTEN and start server test server to run this test")
+	}
+	url := fmt.Sprintf("http://%s/%s/auth/logout", listen, os.Getenv("START_PATH"))
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		t.Errorf("TestLogoutSuccess failed with error: %s", err.Error())
