@@ -49,7 +49,7 @@ const Header = () => {
           className={classes.toolbarTitle}
           onClick={() => dispatch(fullResetListingsState())}
         >
-          Micro
+          {config.headerTitle}
         </Link>
         {username ? (
           <Fragment>

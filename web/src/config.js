@@ -9,6 +9,8 @@ if (hostname === "localhost") {
   blogApiUrl = "http://localhost:8001/api/v1/blog";
 }
 
+const headerTitle = "Micro Go Blog";
+
 const header = [
   { label: "Javascript", tag: "javascript", link: "/?tag=javascript" },
   { label: "Go", tag: "go", link: "/?tag=go" },
@@ -22,5 +24,6 @@ export default {
   blogApiUrl,
   photoUrl: "https://photo.sitename.com",
   thumbUrl: "https://photo.sitename.com/thumb_",
+  headerTitle,
   header
 };

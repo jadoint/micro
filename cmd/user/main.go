@@ -11,12 +11,12 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
 
-	"github.com/jadoint/micro/conn"
-	"github.com/jadoint/micro/db"
-	"github.com/jadoint/micro/env"
-	"github.com/jadoint/micro/logger"
-	"github.com/jadoint/micro/user/route"
-	"github.com/jadoint/micro/visitor"
+	"github.com/jadoint/micro/pkg/conn"
+	"github.com/jadoint/micro/pkg/db"
+	"github.com/jadoint/micro/pkg/env"
+	"github.com/jadoint/micro/pkg/logger"
+	"github.com/jadoint/micro/pkg/user/route"
+	"github.com/jadoint/micro/pkg/visitor"
 )
 
 func main() {
