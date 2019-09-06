@@ -12,7 +12,7 @@ import (
 
 	"github.com/jadoint/micro/conn"
 	"github.com/jadoint/micro/db"
-	"github.com/jadoint/micro/user/model"
+	"github.com/jadoint/micro/user"
 	"github.com/jadoint/micro/validate"
 )
 
@@ -24,9 +24,8 @@ func TestSignupSuccess(t *testing.T) {
 	url := fmt.Sprintf("http://%s/%s/auth/signup", listen, os.Getenv("START_PATH"))
 	username := "TestSignupUser"
 	password := "test123"
-	confirmPassword := "test123"
 	email := "test@gmail.com"
-	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s", "confirmPassword": "%s", "email": "%s"}`, username, password, confirmPassword, email)
+	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s", "email": "%s"}`, username, password, email)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer([]byte(postFields)))
 	if err != nil {
 		t.Errorf("TestSignupSuccess failed with error: %s", err.Error())
@@ -73,7 +72,7 @@ func TestSignupSuccess(t *testing.T) {
 	defer clients.DB.Master.Close()
 	defer clients.DB.Read.Close()
 
-	dbUser, err := model.GetUser(clients, newUser.ID)
+	dbUser, err := user.GetUser(clients, newUser.ID)
 	if err != nil {
 		t.Errorf("TestSignupSuccess failed with error: %s", err.Error())
 	}
@@ -103,9 +102,8 @@ func TestSignupBadUsername(t *testing.T) {
 	url := fmt.Sprintf("http://%s/%s/auth/signup", listen, os.Getenv("START_PATH"))
 	username := "!@#$%^&*())_+"
 	password := "test123"
-	confirmPassword := "test123"
 	email := "test@gmail.com"
-	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s", "confirmPassword": "%s", "email": "%s"}`, username, password, confirmPassword, email)
+	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s", "email": "%s"}`, username, password, email)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer([]byte(postFields)))
 	if err != nil {
 		t.Errorf("TestSignupBadUsername failed with error: %s", err.Error())
@@ -132,9 +130,8 @@ func TestSignupBadPassword(t *testing.T) {
 	url := fmt.Sprintf("http://%s/%s/auth/signup", listen, os.Getenv("START_PATH"))
 	username := "TestSignupBadPassword"
 	password := "123"
-	confirmPassword := "123"
 	email := "test@gmail.com"
-	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s", "confirmPassword": "%s", "email": "%s"}`, username, password, confirmPassword, email)
+	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s", "email": "%s"}`, username, password, email)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer([]byte(postFields)))
 	if err != nil {
 		t.Errorf("TestSignupBadPassword failed with error: %s", err.Error())
@@ -153,35 +150,6 @@ func TestSignupBadPassword(t *testing.T) {
 	}
 }
 
-func TestSignupBadPasswordConfirmation(t *testing.T) {
-	listen := os.Getenv("LISTEN")
-	if listen == "" {
-		t.Skip("Set LISTEN and start server test server to run this test")
-	}
-	url := fmt.Sprintf("http://%s/%s/auth/signup", listen, os.Getenv("START_PATH"))
-	username := "TestSignupBadPasswordConfirmation"
-	password := "test123"
-	confirmPassword := "test1234"
-	email := "test@gmail.com"
-	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s", "confirmPassword": "%s", "email": "%s"}`, username, password, confirmPassword, email)
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer([]byte(postFields)))
-	if err != nil {
-		t.Errorf("TestSignupBadPasswordConfirmation failed with error: %s", err.Error())
-	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Errorf("TestSignupBadPasswordConfirmation failed with error: %s", err.Error())
-	}
-
-	got := string(body)
-	want := `"error":`
-	if !strings.Contains(got, want) {
-		t.Errorf("TestSignupBadPasswordConfirmation failed, got: %s, want: %s", got, want)
-	}
-}
-
 func TestSignupBadEmail(t *testing.T) {
 	listen := os.Getenv("LISTEN")
 	if listen == "" {
@@ -190,9 +158,8 @@ func TestSignupBadEmail(t *testing.T) {
 	url := fmt.Sprintf("http://%s/%s/auth/signup", listen, os.Getenv("START_PATH"))
 	username := "TestSignupBadEmail"
 	password := "test123"
-	confirmPassword := "test123"
 	email := "bademail"
-	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s", "confirmPassword": "%s", "email": "%s"}`, username, password, confirmPassword, email)
+	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s", "email": "%s"}`, username, password, email)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer([]byte(postFields)))
 	if err != nil {
 		t.Errorf("TestSignupBadEmail failed with error: %s", err.Error())
@@ -219,9 +186,8 @@ func TestSignupAlreadyLoggedIn(t *testing.T) {
 	url := fmt.Sprintf("http://%s/%s/auth/signup", listen, os.Getenv("START_PATH"))
 	username := "TestSignupUser"
 	password := "test123"
-	confirmPassword := "test123"
 	email := "test@gmail.com"
-	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s", "confirmPassword": "%s", "email": "%s"}`, username, password, confirmPassword, email)
+	postFields := fmt.Sprintf(`{"username": "%s", "password": "%s", "email": "%s"}`, username, password, email)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(postFields)))
 	if err != nil {
 		t.Errorf("TestSignupAlreadyLoggedIn failed with error: %s", err.Error())

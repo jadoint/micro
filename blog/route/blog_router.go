@@ -4,15 +4,17 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi"
 
-	"github.com/jadoint/micro/blog/model"
+	"github.com/jadoint/micro/blog"
 	"github.com/jadoint/micro/clean"
 	"github.com/jadoint/micro/conn"
 	"github.com/jadoint/micro/errutil"
 	"github.com/jadoint/micro/logger"
 	"github.com/jadoint/micro/now"
+	"github.com/jadoint/micro/paginate"
 	"github.com/jadoint/micro/validate"
 	"github.com/jadoint/micro/visitor"
 	"github.com/jadoint/micro/words"
@@ -22,7 +24,7 @@ import (
 func BlogRouter(clients *conn.Clients) chi.Router {
 	r := chi.NewRouter()
 
-	r.Get("/{idBlog}", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/{idBlog:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 		idBlogParam, err := strconv.Atoi(chi.URLParam(r, "idBlog"))
 		if err != nil {
 			http.Error(w, "", http.StatusUnauthorized)
@@ -32,17 +34,30 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 
 		visitor := visitor.GetVisitor(r)
 
-		blog, err := model.GetBlog(clients, idBlog)
+		b, err := blog.Get(clients, idBlog)
 		if err != nil {
 			http.Error(w, "", http.StatusNotFound)
 			return
 		}
 
+		// Format date/time
+		t, _ := time.Parse("2006-01-02 15:04:05", b.Created)
+		b.Created = t.Format("January 02, 2006")
+		t, _ = time.Parse("2006-01-02 15:04:05", b.Modified)
+		b.Modified = t.Format("January 02, 2006")
+		b.ModifiedDatetime = t.Format("20060102150405")
+
+		// Authorization
+		if b.IsDraft && b.IDAuthor != visitor.ID {
+			http.Error(w, "", http.StatusUnauthorized)
+			return
+		}
+
 		res, err := json.Marshal(struct {
-			*model.Blog
+			*blog.Blog
 			IDVisitor int64 `json:"idVisitor,omitempty"`
 		}{
-			blog,
+			b,
 			visitor.ID,
 		})
 		if err != nil {
@@ -63,7 +78,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		d := json.NewDecoder(r.Body)
 		d.DisallowUnknownFields()
 
-		var b model.Blog
+		var b blog.Blog
 		err := d.Decode(&b)
 		if err != nil {
 			logger.Panic(err.Error())
@@ -76,15 +91,20 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		ugc := clean.UGC()
 		b.Post = ugc.Sanitize(b.Post)
 		b.WordCount = words.Count(&b.Post)
+		// Privacy
+		if b.IsDraft {
+			b.IsUnlisted = true
+		}
 
 		// Validation
 		err = validate.Struct(b)
 		if err != nil {
-			logger.Panic(err.Error())
+			errutil.Send(w, err.Error(), http.StatusBadRequest)
+			return
 		}
 
 		// Save
-		idBlog, err := model.AddBlog(clients, &b)
+		idBlog, err := blog.Add(clients, &b)
 		if err != nil {
 			logger.Panic(err.Error(), "Add Blog ID", idBlog)
 		}
@@ -95,7 +115,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		w.Write(res)
 	})
 
-	r.Put("/{idBlog}", func(w http.ResponseWriter, r *http.Request) {
+	r.Put("/{idBlog:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 		idBlogParam, err := strconv.Atoi(chi.URLParam(r, "idBlog"))
 		if err != nil {
 			http.Error(w, "", http.StatusBadRequest)
@@ -115,7 +135,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		d := json.NewDecoder(r.Body)
 		d.DisallowUnknownFields()
 
-		var b model.Blog
+		var b blog.Blog
 		err = d.Decode(&b)
 		if err != nil {
 			logger.Panic(err.Error())
@@ -130,6 +150,10 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		b.Post = ugc.Sanitize(b.Post)
 		b.WordCount = words.Count(&b.Post)
 		b.Modified = now.MySQLUTC()
+		// Privacy
+		if b.IsDraft {
+			b.IsUnlisted = true
+		}
 
 		// Validation
 		err = validate.Struct(b)
@@ -139,7 +163,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		}
 
 		// Save
-		err = model.UpdateBlog(clients, &b)
+		err = blog.Update(clients, &b)
 		if err != nil {
 			logger.Panic(err.Error(), "Update Blog ID", idBlog)
 		}
@@ -150,7 +174,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		w.Write(res)
 	})
 
-	r.Delete("/{idBlog}", func(w http.ResponseWriter, r *http.Request) {
+	r.Delete("/{idBlog:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 		idBlogParam, err := strconv.Atoi(chi.URLParam(r, "idBlog"))
 		if err != nil {
 			http.Error(w, "", http.StatusBadRequest)
@@ -167,7 +191,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		}
 
 		// Delete
-		err = model.DeleteBlog(clients, idBlog)
+		err = blog.Delete(clients, idBlog)
 		if err != nil {
 			logger.Panic(err.Error(), "Delete Blog ID", idBlog)
 		}
@@ -179,7 +203,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 	})
 
 	// Blog views
-	r.Get("/views/{idBlog}", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/views/{idBlog:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 		idBlogParam, err := strconv.Atoi(chi.URLParam(r, "idBlog"))
 		if err != nil {
 			http.Error(w, "", http.StatusUnauthorized)
@@ -187,7 +211,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		}
 		idBlog := int64(idBlogParam)
 
-		views, err := model.IncrViews(clients, idBlog)
+		views, err := blog.IncrViews(clients, idBlog)
 		if err != nil {
 			http.Error(w, "", http.StatusNotFound)
 			return
@@ -203,22 +227,89 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		w.Write(res)
 	})
 
+	r.Get("/latest", func(w http.ResponseWriter, r *http.Request) {
+		v := visitor.GetVisitor(r)
+
+		pageNum, err := paginate.GetPageNum(r)
+		if err != nil {
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
+
+		var blogs []*blog.Blog
+		tagParam := r.URL.Query().Get("tag")
+		if tagParam != "" {
+			// Latest blog listings by tag
+			var t blog.Tag
+			t.Tag = tagParam
+
+			// Validation
+			err = t.Validate()
+			if err != nil {
+				errutil.Send(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			blogs, err = blog.GetLatestByTag(clients, t.Tag, pageNum, 10)
+			if err != nil {
+				http.Error(w, "", http.StatusNotFound)
+				return
+			}
+		} else {
+			// Latest blog listings
+			blogs, err = blog.GetLatest(clients, pageNum, 10)
+		}
+
+		if err != nil {
+			http.Error(w, "", http.StatusNotFound)
+			return
+		}
+
+		res, err := json.Marshal(struct {
+			Listings  []*blog.Blog `json:"listings"`
+			PageNum   int          `json:"pageNum,omitempty"`
+			IDVisitor int64        `json:"idVisitor,omitempty"`
+		}{
+			Listings:  blogs,
+			PageNum:   pageNum,
+			IDVisitor: v.ID,
+		})
+		if err != nil {
+			logger.Panic(err.Error(), "Latest blogs")
+		}
+
+		w.Write(res)
+	})
+
+	r.Get("/recent/{idAuthor:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+		idAuthorParam, err := strconv.Atoi(chi.URLParam(r, "idAuthor"))
+		if err != nil {
+			http.Error(w, "", http.StatusUnauthorized)
+			return
+		}
+		idAuthor := int64(idAuthorParam)
+
+		v := visitor.GetVisitor(r)
+
+		blogs, err := blog.GetRecentAuthorBlogs(clients, idAuthor)
+		if err != nil {
+			http.Error(w, "", http.StatusNotFound)
+			return
+		}
+
+		res, err := json.Marshal(struct {
+			Listings  []*blog.Blog `json:"listings"`
+			IDVisitor int64        `json:"idVisitor,omitempty"`
+		}{
+			Listings:  blogs,
+			IDVisitor: v.ID,
+		})
+		if err != nil {
+			logger.Panic(err.Error(), "Recent blogs by author ID", idAuthor)
+		}
+
+		w.Write(res)
+	})
+
 	return r
-}
-
-// isAuthorized checks if visitor is authorized to do an action
-func isAuthorized(clients *conn.Clients, v *visitor.Visitor, idBlog int64) (bool, int) {
-	if v.ID == 0 {
-		return false, http.StatusUnauthorized
-	}
-
-	idAuthor, err := model.GetIDAuthor(clients, idBlog)
-	if err != nil {
-		return false, http.StatusNotFound
-	}
-	if idAuthor != v.ID {
-		return false, http.StatusForbidden
-	}
-
-	return true, http.StatusOK
 }

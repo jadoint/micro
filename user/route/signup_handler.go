@@ -9,7 +9,7 @@ import (
 	"github.com/jadoint/micro/conn"
 	"github.com/jadoint/micro/errutil"
 	"github.com/jadoint/micro/logger"
-	"github.com/jadoint/micro/user/model"
+	"github.com/jadoint/micro/user"
 	"github.com/jadoint/micro/validate"
 	"github.com/jadoint/micro/visitor"
 )
@@ -24,7 +24,7 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
-	var ur model.UserRegistration
+	var ur user.Registration
 	err := d.Decode(&ur)
 	if err != nil {
 		logger.Panic(err.Error())
@@ -37,13 +37,13 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	}
 
 	// Check if username is unique
-	u, _ := model.GetUserByUsername(clients, ur.Username)
+	u, _ := user.GetUserByUsername(clients, ur.Username)
 	if ur.Username == u.Username {
 		errutil.Send(w, "Username already exists", http.StatusForbidden)
 		return
 	}
 
-	idUser, err := model.AddUser(clients, &ur)
+	idUser, err := user.AddUser(clients, &ur)
 	if err != nil {
 		logger.Panic(err.Error())
 	}
@@ -58,7 +58,7 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	auth.AddCookie(w, os.Getenv("COOKIE_SESSION_NAME"), tokenString)
 
 	// Response
-	newUser := &model.User{ID: idUser, Username: ur.Username}
+	newUser := &user.User{ID: idUser, Username: ur.Username}
 	res, err := json.Marshal(newUser)
 	if err != nil {
 		logger.Panic(err.Error())

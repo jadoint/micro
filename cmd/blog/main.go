@@ -7,8 +7,12 @@ import (
 	"os"
 	"time"
 
+	"github.com/didip/tollbooth"
+	"github.com/didip/tollbooth/limiter"
+	"github.com/didip/tollbooth_chi"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
 	"github.com/go-redis/redis"
 
 	"github.com/jadoint/micro/blog/route"
@@ -60,11 +64,27 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.SetHeader("Content-Type", "application/json"))
+	cors := cors.New(cors.Options{
+		AllowedOrigins:   []string{os.Getenv("SITE_URL")},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	})
+	r.Use(cors.Handler)
+	if os.Getenv("ENV") == "development" {
+		r.Use(middleware.SetHeader("Access-Control-Allow-Origin", os.Getenv("SITE_URL")))
+	}
+	// Rate limiter: first argument is "x requests / second" per IP
+	lmt := tollbooth.NewLimiter(100, &limiter.ExpirableOptions{DefaultExpirationTTL: time.Hour})
+	lmt.SetIPLookups([]string{"X-Forwarded-For", "RemoteAddr", "X-Real-IP"})
+	r.Use(tollbooth_chi.LimitHandler(lmt))
 	r.Use(visitor.Middleware)
 
 	startPath := fmt.Sprintf(`/%s/`, os.Getenv("START_PATH"))
+	r.Mount(startPath+"blog/tag", route.TagRouter(clients))
 	r.Mount(startPath+"blog", route.BlogRouter(clients))
-	r.Mount(startPath+"blogs", route.BlogsRouter(clients))
 
 	srv := &http.Server{
 		Addr:         os.Getenv("LISTEN"),

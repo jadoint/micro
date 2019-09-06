@@ -2,18 +2,24 @@ package auth
 
 import (
 	"net/http"
+	"os"
 	"time"
 )
 
 // AddCookie adds cookie to a visitor's browser
 func AddCookie(w http.ResponseWriter, name string, value string) {
+	env := os.Getenv("ENV")
+	isSecure := true
+	if env == "development" {
+		isSecure = false
+	}
 	expire := time.Now().AddDate(1, 0, 0)
 	cookie := http.Cookie{
 		Name:     name,
 		Value:    value,
 		Path:     "/",
 		Expires:  expire,
-		Secure:   false,
+		Secure:   isSecure,
 		HttpOnly: true,
 	}
 	http.SetCookie(w, &cookie)

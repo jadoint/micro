@@ -9,7 +9,7 @@ import (
 	"github.com/jadoint/micro/conn"
 	"github.com/jadoint/micro/errutil"
 	"github.com/jadoint/micro/logger"
-	"github.com/jadoint/micro/user/model"
+	"github.com/jadoint/micro/user"
 	"github.com/jadoint/micro/validate"
 	"github.com/jadoint/micro/visitor"
 )
@@ -25,7 +25,7 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
-	var ul model.UserLogin
+	var ul user.Login
 	err := d.Decode(&ul)
 	if err != nil {
 		logger.Panic(err.Error())
@@ -39,9 +39,9 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	}
 
 	// Authentication
-	u, _ := model.GetUserByUsername(clients, ul.Username)
+	u, _ := user.GetUserByUsername(clients, ul.Username)
 	if ul.Username != u.Username {
-		errutil.Send(w, "Username does not exist", http.StatusUnauthorized)
+		errutil.Send(w, "Username and password do not match", http.StatusUnauthorized)
 		return
 	}
 
@@ -50,7 +50,7 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 		logger.Panic(err.Error())
 	}
 	if !isMatchingPasswords {
-		errutil.Send(w, "Password does not match", http.StatusUnauthorized)
+		errutil.Send(w, "Username and password do not match", http.StatusUnauthorized)
 		return
 	}
 

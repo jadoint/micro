@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
 
 	"github.com/jadoint/micro/conn"
 	"github.com/jadoint/micro/db"
@@ -52,10 +53,23 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.SetHeader("Content-Type", "application/json"))
+	cors := cors.New(cors.Options{
+		AllowedOrigins:   []string{os.Getenv("SITE_URL")},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	})
+	r.Use(cors.Handler)
+	if os.Getenv("ENV") == "development" {
+		r.Use(middleware.SetHeader("Access-Control-Allow-Origin", os.Getenv("SITE_URL")))
+	}
 	r.Use(visitor.Middleware)
 
 	startPath := fmt.Sprintf(`/%s/`, os.Getenv("START_PATH"))
 	r.Mount(startPath+"auth", route.AuthRouter(clients))
+	r.Mount(startPath+"user", route.UserRouter(clients))
 
 	srv := &http.Server{
 		Addr:         os.Getenv("LISTEN"),
