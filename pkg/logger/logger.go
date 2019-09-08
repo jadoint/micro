@@ -15,3 +15,12 @@ func Panic(v ...interface{}) {
 		log.Panic(file, ":", line)
 	}
 }
+
+// HandleError will log error and panic
+// if an error is found.
+func HandleError(e error) {
+	if e == nil {
+		return
+	}
+	Panic(e.Error())
+}

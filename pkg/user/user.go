@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	// Standard anonymous sql driver import
 	_ "github.com/go-sql-driver/mysql"
@@ -21,16 +22,25 @@ type User struct {
 	Password string `db:"password,omitempty" json:"-"`
 	Email    string `db:"email,omitempty" json:"email,omitempty"`
 	Created  string `db:"created,omitempty" json:"created,omitempty"`
-	Title    string `db:"title,omitempty" json:"title,omitempty"`
-	About    string `db:"about,omitempty" json:"about,omitempty"`
 	Modified string `db:"modified,omitempty" json:"modified,omitempty"`
 }
 
 // Registration contains user registration details
 type Registration struct {
-	Username string `json:"username" validate:"required,min=3,max=20,alphanum"`
-	Password string `json:"password" validate:"required,min=6,max=255"`
-	Email    string `json:"email" validate:"required,email"`
+	Username       string `json:"username" validate:"required,min=3,max=20,alphanum"`
+	Password       string `json:"password" validate:"required,min=6,max=255"`
+	Email          string `json:"email" validate:"required,email"`
+	RecaptchaToken string `json:"recaptchaToken" validate:"required"`
+}
+
+// RecaptchaResponse recaptcha response from verification step
+type RecaptchaResponse struct {
+	Success     bool     `json:"success"`
+	ChallengeTS string   `json:"challenge_ts"`
+	Hostname    string   `json:"hostname"`
+	Score       float64  `json:"score"`
+	Action      string   `json:"action"`
+	ErrorCodes  []string `json:"error-codes"`
 }
 
 // Login contains user login details
@@ -41,8 +51,8 @@ type Login struct {
 
 // About contains user_profile details
 type About struct {
-	Title sql.NullString `db:"title,omitempty" json:"title,omitempty"`
-	About sql.NullString `db:"about,omitempty" json:"about,omitempty"`
+	Title string `db:"title,omitempty" json:"title,omitempty"`
+	About string `db:"about,omitempty" json:"about,omitempty"`
 }
 
 // UserIDs contains a list of user IDs
@@ -159,7 +169,7 @@ func GetUsernames(clients *conn.Clients, uids *UserIDs) ([]*Username, error) {
 }
 
 // AddUser inserts user into user table
-func AddUser(clients *conn.Clients, ur *Registration) (int64, error) {
+func AddUser(clients *conn.Clients, ur *Registration, rr *RecaptchaResponse) (int64, error) {
 	passwordHash, err := auth.GenerateHash(ur.Password)
 	if err != nil {
 		return 0, err
@@ -175,13 +185,28 @@ func AddUser(clients *conn.Clients, ur *Registration) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
+	lastError := ""
+	if len(rr.ErrorCodes) > 0 {
+		lastError = strings.Join(rr.ErrorCodes, ",")
+	}
+
+	_, err = clients.DB.Exec(`
+		INSERT INTO recaptcha_log(id_user, score, action, last_error)
+		VALUES(?, ?, ?, ?)`,
+		idUser, rr.Score, rr.Action, lastError)
+	if err != nil {
+		return 0, err
+	}
+
 	return idUser, nil
 }
 
 // GetAbout gets user_profile details of a user
-func GetAbout(clients *conn.Clients, idUser int64) (*User, error) {
+func GetAbout(clients *conn.Clients, idUser int64) (*About, error) {
 	db := clients.DB.Read
-	var a About
+	var title sql.NullString
+	var about sql.NullString
 	err := db.QueryRow(`
 		SELECT title, about
 		FROM user_profile
@@ -189,31 +214,31 @@ func GetAbout(clients *conn.Clients, idUser int64) (*User, error) {
 		LIMIT 1
 		# GetAbout
 	`, idUser).
-		Scan(&a.Title, &a.About)
+		Scan(&title, &about)
 	if err != nil {
 		if err != sql.ErrNoRows {
 			logger.Panic(err.Error())
 		}
 		return nil, err
 	}
-	var u User
-	if a.Title.Valid {
-		u.Title = a.Title.String
+	var a About
+	if title.Valid {
+		a.Title = title.String
 	}
-	if a.About.Valid {
-		u.About = a.About.String
+	if about.Valid {
+		a.About = about.String
 	}
-	return &u, nil
+	return &a, nil
 }
 
 // UpdateAbout updates user_profile details of a user
-func UpdateAbout(clients *conn.Clients, u *User) error {
+func UpdateAbout(clients *conn.Clients, idUser int64, a *About) error {
 	_, err := clients.DB.Exec(`
 		UPDATE user_profile
 		SET title = ?, about = ?
 		WHERE id_user = ?
 		LIMIT 1`,
-		u.Title, u.About, u.ID)
+		a.Title, a.About, idUser)
 	if err != nil {
 		return err
 	}

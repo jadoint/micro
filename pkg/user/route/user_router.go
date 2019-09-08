@@ -102,7 +102,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 		}
 		idUser := int64(idUserParam)
 
-		u, err := user.GetAbout(clients, idUser)
+		a, err := user.GetAbout(clients, idUser)
 		if err != nil {
 			errutil.Send(w, "", http.StatusNotFound)
 			return
@@ -113,8 +113,8 @@ func UserRouter(clients *conn.Clients) chi.Router {
 			Title string `json:"title"`
 			About string `json:"about"`
 		}{
-			Title: u.Title,
-			About: u.About,
+			Title: a.Title,
+			About: a.About,
 		})
 		if err != nil {
 			logger.Panic(err.Error())
@@ -142,28 +142,27 @@ func UserRouter(clients *conn.Clients) chi.Router {
 		d := json.NewDecoder(r.Body)
 		d.DisallowUnknownFields()
 
-		var u user.User
-		err = d.Decode(&u)
+		var a user.About
+		err = d.Decode(&a)
 		if err != nil {
 			logger.Panic(err.Error())
 		}
-		u.ID = v.ID
 		// Strip inputs of all tags
 		strict := clean.Strict()
-		u.Title = strict.Sanitize(u.Title)
-		u.About = strict.Sanitize(u.About)
+		a.Title = strict.Sanitize(a.Title)
+		a.About = strict.Sanitize(a.About)
 
 		// Validation
-		err = validate.Struct(u)
+		err = validate.Struct(a)
 		if err != nil {
 			errutil.Send(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		// Save
-		err = user.UpdateAbout(clients, &u)
+		err = user.UpdateAbout(clients, v.ID, &a)
 		if err != nil {
-			logger.Panic(err.Error(), "Update About", u.ID)
+			logger.Panic(err.Error(), "Update About", v.ID)
 		}
 
 		// Response

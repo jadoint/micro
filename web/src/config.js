@@ -18,6 +18,8 @@ const header = [
   { label: "Cache", tag: "cache", link: "/?tag=cache" }
 ];
 
+const recaptchaKey = "6LdSJrcUAAAAAFvw7xIl1pXg4cX2zu4WeNDkv7k0";
+
 export default {
   authApiUrl,
   userApiUrl,
@@ -25,5 +27,6 @@ export default {
   photoUrl: "https://photo.sitename.com",
   thumbUrl: "https://photo.sitename.com/thumb_",
   headerTitle,
-  header
+  header,
+  recaptchaKey
 };

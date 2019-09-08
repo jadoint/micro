@@ -9,22 +9,30 @@ import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Link from "@material-ui/core/Link";
+import { ReCaptcha } from "react-recaptcha-v3";
 
+import config from "../../config";
 import useStyles from "../../hooks/styles";
 import { handleTextChange } from "../../utils/input";
-import { signup, setUsername } from "../../actions/authAction";
+import {
+  signup,
+  setUsername,
+  setRecaptchaToken
+} from "../../actions/authAction";
 
 const Signup = props => {
   const classes = useStyles();
 
   // Redux
   const username = useSelector(state => state.authReducer.username);
+  const recaptchaToken = useSelector(state => state.authReducer.recaptchaToken);
 
   // Local state
   const [inputState, setInputState] = useState("");
 
   const dispatch = useDispatch();
 
+  // Checks if visitor is already logged in
   useEffect(() => {
     if (username !== "") {
       props.history.replace("/");
@@ -38,19 +46,30 @@ const Signup = props => {
     }
   }, [username, props, dispatch]);
 
+  // Set reCaptcha token in state
+  const verifyRecaptcha = token => {
+    dispatch(setRecaptchaToken(token));
+  };
+
   const doSubmit = e => {
     e.preventDefault();
     dispatch(
       signup({
         username: inputState.username,
         email: inputState.email,
-        password: inputState.password
+        password: inputState.password,
+        recaptchaToken
       })
     );
   };
 
   return (
     <Container component="main" maxWidth="xs">
+      <ReCaptcha
+        sitekey={config.recaptchaKey}
+        action="signup"
+        verifyCallback={verifyRecaptcha}
+      />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
           <LockOutlinedIcon />
@@ -130,9 +149,30 @@ const Signup = props => {
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
-              <Link component={RouterLink} to="/auth/login" variant="body2">
-                Already have an account? Sign in
-              </Link>
+              <Typography gutterBottom>
+                <Link component={RouterLink} to="/auth/login" variant="body2">
+                  Already have an account? Sign in
+                </Link>
+              </Typography>
+            </Grid>
+          </Grid>
+          <Grid container justify="flex-end">
+            <Grid item>
+              <Typography
+                component="body2"
+                variant="caption"
+                color="textSecondary"
+              >
+                This site is protected by reCAPTCHA and the Google{" "}
+                <Link href="https://policies.google.com/privacy">
+                  Privacy Policy
+                </Link>{" "}
+                and{" "}
+                <Link href="https://policies.google.com/terms">
+                  Terms of Service
+                </Link>{" "}
+                apply.
+              </Typography>
             </Grid>
           </Grid>
         </form>

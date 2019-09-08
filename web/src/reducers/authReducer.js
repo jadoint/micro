@@ -1,6 +1,7 @@
 const initialState = {
   idVisitor: 0,
-  username: ""
+  username: "",
+  recaptchaToken: ""
 };
 
 export default (state = initialState, action) => {
@@ -17,6 +18,9 @@ export default (state = initialState, action) => {
       return { ...state, ...action.payload };
     }
     case "SET_USERNAME": {
+      return { ...state, ...action.payload };
+    }
+    case "SET_RECAPTCHA_TOKEN": {
       return { ...state, ...action.payload };
     }
     default:

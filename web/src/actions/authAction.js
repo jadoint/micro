@@ -36,7 +36,7 @@ export const logout = () => async (dispatch, getState) => {
   } catch (error) {}
 };
 
-export const signup = ({ username, email, password }) => async (
+export const signup = ({ username, email, password, recaptchaToken }) => async (
   dispatch,
   getState
 ) => {
@@ -44,7 +44,8 @@ export const signup = ({ username, email, password }) => async (
     const res = await http.post(`${config.authApiUrl}/signup`, {
       username,
       email,
-      password
+      password,
+      recaptchaToken
     });
 
     const { id: idVisitor, username: dbUsername } = res.data;
@@ -64,5 +65,12 @@ export const setUsername = username => (dispatch, getState) => {
   dispatch({
     type: "SET_USERNAME",
     payload: { username }
+  });
+};
+
+export const setRecaptchaToken = recaptchaToken => (dispatch, getState) => {
+  dispatch({
+    type: "SET_RECAPTCHA_TOKEN",
+    payload: { recaptchaToken }
   });
 };

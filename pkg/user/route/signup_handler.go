@@ -3,7 +3,9 @@ package route
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"os"
+	"strconv"
 
 	"github.com/jadoint/micro/pkg/auth"
 	"github.com/jadoint/micro/pkg/conn"
@@ -15,24 +17,34 @@ import (
 )
 
 func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
-	visitor := visitor.GetVisitor(r)
-	if visitor.ID > 0 {
+	v := visitor.GetVisitor(r)
+	if v.ID > 0 {
 		errutil.Send(w, "Already logged in", http.StatusForbidden)
 		return
 	}
 
+	// Marshalling
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
-
 	var ur user.Registration
 	err := d.Decode(&ur)
 	if err != nil {
 		logger.Panic(err.Error())
 	}
 
+	// Validation
 	err = validate.Struct(ur)
 	if err != nil {
 		errutil.Send(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Verify Recaptcha token
+	rr := validateRecaptcha(ur.RecaptchaToken)
+	scoreThreshold, err := strconv.ParseFloat(os.Getenv("RECAPTCHA_SCORE_THRESHOLD"), 64)
+	logger.HandleError(err)
+	if !rr.Success || rr.Score < scoreThreshold {
+		errutil.Send(w, "Unable to sign up due to captcha failure. Please refresh the page to try again.", http.StatusForbidden)
 		return
 	}
 
@@ -43,10 +55,9 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 		return
 	}
 
-	idUser, err := user.AddUser(clients, &ur)
-	if err != nil {
-		logger.Panic(err.Error())
-	}
+	// Success: Add user
+	idUser, err := user.AddUser(clients, &ur, rr)
+	logger.HandleError(err)
 
 	// JWT
 	tokenString, err := auth.MakeAuthToken(idUser, ur.Username)
@@ -65,4 +76,27 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	}
 
 	w.Write(res)
+}
+
+func validateRecaptcha(token string) *user.RecaptchaResponse {
+	captchaFields := url.Values{
+		"secret":   {os.Getenv("RECAPTCHA_KEY")},
+		"response": {token},
+	}
+	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", captchaFields)
+	if err != nil {
+		logger.Panic("Unable to verify reCaptcha token: %s", err.Error())
+	}
+	defer resp.Body.Close()
+
+	d := json.NewDecoder(resp.Body)
+	d.DisallowUnknownFields()
+
+	var rr user.RecaptchaResponse
+	err = d.Decode(&rr)
+	if err != nil {
+		logger.Panic(err.Error())
+	}
+
+	return &rr
 }

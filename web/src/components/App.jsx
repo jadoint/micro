@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Route } from "react-router-dom";
 import { Provider } from "react-redux";
 import { createStore, applyMiddleware } from "redux";
@@ -6,7 +6,9 @@ import thunk from "redux-thunk";
 import { ToastContainer } from "react-toastify";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Container from "@material-ui/core/Container";
+import { loadReCaptcha } from "react-recaptcha-v3";
 
+import config from "../config";
 import Header from "../common/Header";
 import Footer from "../common/Footer";
 import Login from "./auth/Login";
@@ -16,10 +18,15 @@ import BlogEdit from "./blog/BlogEdit";
 import BlogList from "./blog/BlogList";
 import BlogView from "./blog/BlogView";
 import reducers from "../reducers";
+import "./App.css";
 
 const store = createStore(reducers, applyMiddleware(thunk));
 
 const App = () => {
+  useEffect(() => {
+    loadReCaptcha(config.recaptchaKey);
+  });
+
   return (
     <BrowserRouter>
       <CssBaseline />
