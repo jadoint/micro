@@ -26,9 +26,7 @@ func TagRouter(clients *conn.Clients) chi.Router {
 		res, err := json.Marshal(struct {
 			FrequentTags []*string `json:"frequentTags,omitempty"`
 		}{tags})
-		if err != nil {
-			logger.Panic(err.Error())
-		}
+		logger.HandleError(err)
 		w.Write(res)
 	})
 
@@ -49,9 +47,7 @@ func TagRouter(clients *conn.Clients) chi.Router {
 		res, err := json.Marshal(struct {
 			Tags []string `json:"tags,omitempty"`
 		}{tags})
-		if err != nil {
-			logger.Panic(err.Error())
-		}
+		logger.HandleError(err)
 		w.Write(res)
 	})
 
@@ -77,9 +73,7 @@ func TagRouter(clients *conn.Clients) chi.Router {
 
 		var t blog.Tag
 		err = d.Decode(&t)
-		if err != nil {
-			logger.Panic(err.Error())
-		}
+		logger.HandleError(err)
 
 		// Validation
 		err = t.Validate()

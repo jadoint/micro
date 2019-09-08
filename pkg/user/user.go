@@ -79,7 +79,7 @@ func GetUser(clients *conn.Clients, idUser int64) (*User, error) {
 		Scan(&u.ID, &u.Username, &u.Password, &u.Created)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.Panic(err.Error())
+			logger.HandleError(err)
 		}
 		return u, err
 	}
@@ -99,7 +99,7 @@ func GetUserByUsername(clients *conn.Clients, username string) (*User, error) {
 		Scan(&u.ID, &u.Username, &u.Password, &u.Created)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.Panic(err.Error())
+			logger.HandleError(err)
 		}
 		return u, err
 	}
@@ -120,7 +120,7 @@ func GetUsername(clients *conn.Clients, idUser int64) (string, error) {
 		Scan(&u.Username)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.Panic(err.Error())
+			logger.HandleError(err)
 		}
 		return u.Username, err
 	}
@@ -156,7 +156,7 @@ func GetUsernames(clients *conn.Clients, uids *UserIDs) ([]*Username, error) {
 		err := rows.Scan(&u.ID, &u.Username)
 		if err != nil {
 			if err != sql.ErrNoRows {
-				logger.Panic(err.Error())
+				logger.HandleError(err)
 			}
 			return nil, err
 		}
@@ -217,7 +217,7 @@ func GetAbout(clients *conn.Clients, idUser int64) (*About, error) {
 		Scan(&title, &about)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.Panic(err.Error())
+			logger.HandleError(err)
 		}
 		return nil, err
 	}

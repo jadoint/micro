@@ -80,9 +80,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 
 		var b blog.Blog
 		err := d.Decode(&b)
-		if err != nil {
-			logger.Panic(err.Error())
-		}
+		logger.HandleError(err)
 		b.IDAuthor = visitor.ID
 		// Strip title of all tags
 		strict := clean.Strict()
@@ -137,9 +135,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 
 		var b blog.Blog
 		err = d.Decode(&b)
-		if err != nil {
-			logger.Panic(err.Error())
-		}
+		logger.HandleError(err)
 		b.ID = idBlog
 		b.IDAuthor = v.ID
 		// Strip title of all tags

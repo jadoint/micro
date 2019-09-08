@@ -47,9 +47,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 		res, err := json.Marshal(struct {
 			Username string `json:"username"`
 		}{username})
-		if err != nil {
-			logger.Panic(err.Error())
-		}
+		logger.HandleError(err)
 
 		w.Write(res)
 	})
@@ -61,9 +59,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 
 		var uids user.UserIDs
 		err := d.Decode(&uids)
-		if err != nil {
-			logger.Panic(err.Error())
-		}
+		logger.HandleError(err)
 
 		if len(uids.IDs) == 0 {
 			errutil.Send(w, "", http.StatusBadRequest)
@@ -87,9 +83,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 		res, err := json.Marshal(struct {
 			Usernames []*user.Username `json:"usernames"`
 		}{names})
-		if err != nil {
-			logger.Panic(err.Error())
-		}
+		logger.HandleError(err)
 
 		w.Write(res)
 	})
@@ -116,9 +110,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 			Title: a.Title,
 			About: a.About,
 		})
-		if err != nil {
-			logger.Panic(err.Error())
-		}
+		logger.HandleError(err)
 
 		w.Write(res)
 	})
@@ -144,9 +136,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 
 		var a user.About
 		err = d.Decode(&a)
-		if err != nil {
-			logger.Panic(err.Error())
-		}
+		logger.HandleError(err)
 		// Strip inputs of all tags
 		strict := clean.Strict()
 		a.Title = strict.Sanitize(a.Title)

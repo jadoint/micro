@@ -62,7 +62,7 @@ func GetFrequentTags(clients *conn.Clients) ([]*string, error) {
 		err := rows.Scan(&t)
 		if err != nil {
 			if err != sql.ErrNoRows {
-				logger.Panic(err.Error())
+				logger.HandleError(err)
 			}
 			return nil, err
 		}
@@ -87,7 +87,7 @@ func GetTagsCSV(clients *conn.Clients, idBlog int64) (string, error) {
 		Scan(&tagCsv)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.Panic(err.Error())
+			logger.HandleError(err)
 		}
 		return tagCsv, err
 	}
@@ -281,7 +281,7 @@ func GetIDByTag(clients *conn.Clients, tag string) (int64, error) {
 		Scan(&t.ID)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.Panic(err.Error())
+			logger.HandleError(err)
 		}
 		return 0, err
 	}
@@ -301,7 +301,7 @@ func GetTagByID(clients *conn.Clients, idTag int64) (string, error) {
 		Scan(&t.Tag)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.Panic(err.Error())
+			logger.HandleError(err)
 		}
 		return "", err
 	}

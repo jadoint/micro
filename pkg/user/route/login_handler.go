@@ -27,9 +27,7 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 
 	var ul user.Login
 	err := d.Decode(&ul)
-	if err != nil {
-		logger.Panic(err.Error())
-	}
+	logger.HandleError(err)
 
 	// Validation
 	err = validate.Struct(ul)
@@ -46,9 +44,7 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	}
 
 	isMatchingPasswords, err := auth.VerifyPasswordHash(ul.Password, u.Password)
-	if err != nil {
-		logger.Panic(err.Error())
-	}
+	logger.HandleError(err)
 	if !isMatchingPasswords {
 		errutil.Send(w, "Username and password do not match", http.StatusUnauthorized)
 		return
@@ -56,9 +52,7 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 
 	// JWT
 	tokenString, err := auth.MakeAuthToken(u.ID, u.Username)
-	if err != nil {
-		logger.Panic(err.Error())
-	}
+	logger.HandleError(err)
 
 	// Cookie
 	auth.AddCookie(w, os.Getenv("COOKIE_SESSION_NAME"), tokenString)
@@ -66,9 +60,7 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	// Response
 	u.Created = ""
 	res, err := json.Marshal(u)
-	if err != nil {
-		logger.Panic(err.Error())
-	}
+	logger.HandleError(err)
 
 	w.Write(res)
 }

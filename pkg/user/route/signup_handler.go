@@ -28,9 +28,7 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	d.DisallowUnknownFields()
 	var ur user.Registration
 	err := d.Decode(&ur)
-	if err != nil {
-		logger.Panic(err.Error())
-	}
+	logger.HandleError(err)
 
 	// Validation
 	err = validate.Struct(ur)
@@ -61,9 +59,7 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 
 	// JWT
 	tokenString, err := auth.MakeAuthToken(idUser, ur.Username)
-	if err != nil {
-		logger.Panic(err.Error())
-	}
+	logger.HandleError(err)
 
 	// Cookie
 	auth.AddCookie(w, os.Getenv("COOKIE_SESSION_NAME"), tokenString)
@@ -71,9 +67,7 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	// Response
 	newUser := &user.User{ID: idUser, Username: ur.Username}
 	res, err := json.Marshal(newUser)
-	if err != nil {
-		logger.Panic(err.Error())
-	}
+	logger.HandleError(err)
 
 	w.Write(res)
 }
@@ -94,9 +88,7 @@ func validateRecaptcha(token string) *user.RecaptchaResponse {
 
 	var rr user.RecaptchaResponse
 	err = d.Decode(&rr)
-	if err != nil {
-		logger.Panic(err.Error())
-	}
+	logger.HandleError(err)
 
 	return &rr
 }

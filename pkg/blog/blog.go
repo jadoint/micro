@@ -61,7 +61,7 @@ func GetLatest(clients *conn.Clients, pageNum int, pageSize int) ([]*Blog, error
 			&b.WordCount, &b.Created, &b.Modified, &t.Tags)
 		if err != nil {
 			if err != sql.ErrNoRows {
-				logger.Panic(err.Error())
+				logger.HandleError(err)
 			}
 			return nil, err
 		}
@@ -113,7 +113,7 @@ func GetLatestByTag(clients *conn.Clients, tag string, pageNum int, pageSize int
 			&b.WordCount, &b.Created, &b.Modified, &t.Tags)
 		if err != nil {
 			if err != sql.ErrNoRows {
-				logger.Panic(err.Error())
+				logger.HandleError(err)
 			}
 			return nil, err
 		}
@@ -156,7 +156,7 @@ func GetRecentAuthorBlogs(clients *conn.Clients, idAuthor int64) ([]*Blog, error
 		err := rows.Scan(&b.ID, &b.Title)
 		if err != nil {
 			if err != sql.ErrNoRows {
-				logger.Panic(err.Error())
+				logger.HandleError(err)
 			}
 			return nil, err
 		}
@@ -185,7 +185,7 @@ func Get(clients *conn.Clients, idBlog int64) (*Blog, error) {
 			&b.Created, &b.Modified, &b.IsUnlisted, &b.IsDraft)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.Panic(err.Error())
+			logger.HandleError(err)
 		}
 		return &b, err
 	}
@@ -206,7 +206,7 @@ func GetPost(clients *conn.Clients, idBlog int64) (*Blog, error) {
 			&b.Created, &b.Modified)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.Panic(err.Error())
+			logger.HandleError(err)
 		}
 		return &b, err
 	}
@@ -226,7 +226,7 @@ func GetIDAuthor(clients *conn.Clients, idBlog int64) (int64, error) {
 		Scan(&idAuthor)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.Panic(err.Error())
+			logger.HandleError(err)
 		}
 		return idAuthor, err
 	}
@@ -312,7 +312,7 @@ func GetViews(clients *conn.Clients, idBlog int64) (int64, error) {
 		Scan(&views)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.Panic(err.Error())
+			logger.HandleError(err)
 		}
 		return 0, err
 	}
