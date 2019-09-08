@@ -34,6 +34,7 @@ type Registration struct {
 }
 
 // RecaptchaResponse recaptcha response from verification step
+// See: https://developers.google.com/recaptcha/docs/v3
 type RecaptchaResponse struct {
 	Success     bool     `json:"success"`
 	ChallengeTS string   `json:"challenge_ts"`
