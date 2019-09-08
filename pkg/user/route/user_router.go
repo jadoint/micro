@@ -57,7 +57,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 		d := json.NewDecoder(r.Body)
 		d.DisallowUnknownFields()
 
-		var uids user.UserIDs
+		var uids user.IDs
 		err := d.Decode(&uids)
 		logger.HandleError(err)
 

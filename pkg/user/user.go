@@ -55,8 +55,8 @@ type About struct {
 	About string `db:"about,omitempty" json:"about,omitempty"`
 }
 
-// UserIDs contains a list of user IDs
-type UserIDs struct {
+// IDs contains a list of user IDs
+type IDs struct {
 	IDs []int64 `json:"ids" validate:"required"`
 }
 
@@ -128,7 +128,7 @@ func GetUsername(clients *conn.Clients, idUser int64) (string, error) {
 }
 
 // GetUsernames creates a slice of username and ID pairs
-func GetUsernames(clients *conn.Clients, uids *UserIDs) ([]*Username, error) {
+func GetUsernames(clients *conn.Clients, uids *IDs) ([]*Username, error) {
 	var csvUserIds string
 	for _, v := range uids.IDs {
 		id := strconv.FormatInt(v, 10)
