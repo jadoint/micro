@@ -23,11 +23,18 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 		return
 	}
 
+	isSignupRestricted, err := strconv.ParseBool(os.Getenv("SIGNUPS_RESTRICTED"))
+	logger.HandleError(err)
+	if isSignupRestricted {
+		errutil.Send(w, "Signups no longer accepted", http.StatusForbidden)
+		return
+	}
+
 	// Marshalling
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 	var ur user.Registration
-	err := d.Decode(&ur)
+	err = d.Decode(&ur)
 	logger.HandleError(err)
 
 	// Validation
