@@ -143,7 +143,13 @@ const Filter = ({ tagFilter, classes }) => {
 
 const Listings = ({ listings, classes }) => {
   const authors = useSelector(state => state.listingsReducer.authors);
-  if (!listings) return null;
+  if (!listings) {
+    return (
+      <Typography variant="body1" color="textSecondary" paragraph>
+        Nothing here yet...
+      </Typography>
+    );
+  }
 
   return (
     <Fragment>

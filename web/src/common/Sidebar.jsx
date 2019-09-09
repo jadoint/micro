@@ -33,23 +33,32 @@ const FrequentTags = () => {
     dispatch(fetchFrequentTags());
   }, [dispatch]);
 
-  return (
-    <Fragment>
-      <Typography variant="h6" gutterBottom className={classes.sidebarSection}>
-        Frequent Tags
-      </Typography>
-      {frequentTags.map(tag => (
-        <Link
-          component={RouterLink}
-          to={`/?pageNum=1&tag=${tag}`}
-          display="block"
-          variant="body1"
-          key={tag}
-          onClick={() => dispatch(fetchListingsByTag(tag))}
+  let frequentTagsView = null;
+  if (frequentTags && frequentTags.length > 0) {
+    frequentTagsView = (
+      <Fragment>
+        <Typography
+          variant="h6"
+          gutterBottom
+          className={classes.sidebarSection}
         >
-          {tag}
-        </Link>
-      ))}
-    </Fragment>
-  );
+          Frequent Tags
+        </Typography>
+        {frequentTags.map(tag => (
+          <Link
+            component={RouterLink}
+            to={`/?pageNum=1&tag=${tag}`}
+            display="block"
+            variant="body1"
+            key={tag}
+            onClick={() => dispatch(fetchListingsByTag(tag))}
+          >
+            {tag}
+          </Link>
+        ))}
+      </Fragment>
+    );
+  }
+
+  return frequentTagsView;
 };
