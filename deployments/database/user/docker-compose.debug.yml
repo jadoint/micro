@@ -1,0 +1,10 @@
+version: "2.1"
+
+services:
+  micro:
+    image: micro-user
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3400:3306
