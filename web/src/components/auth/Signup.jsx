@@ -158,11 +158,7 @@ const Signup = props => {
           </Grid>
           <Grid container justify="flex-end">
             <Grid item>
-              <Typography
-                component="body2"
-                variant="caption"
-                color="textSecondary"
-              >
+              <Typography variant="caption" color="textSecondary">
                 This site is protected by reCAPTCHA and the Google{" "}
                 <Link href="https://policies.google.com/privacy">
                   Privacy Policy
