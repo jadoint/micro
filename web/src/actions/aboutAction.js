@@ -13,12 +13,18 @@ export const fetchAboutAuthor = idAuthor => async (dispatch, getState) => {
   } catch (error) {}
 };
 
-export const updateAboutAuthor = reqPayload => async (dispatch, getState) => {
+export const updateAboutAuthor = (idAuthor, reqPayload) => async (
+  dispatch,
+  getState
+) => {
   try {
-    await http.put(`${config.userApiUrl}/about/${reqPayload.id}`, reqPayload);
+    await http.put(`${config.userApiUrl}/about/${idAuthor}`, reqPayload);
     toast("Saved", { type: toast.TYPE.SUCCESS });
 
-    dispatch(fetchAboutAuthor(reqPayload.id));
+    dispatch({
+      type: "UPDATE_ABOUT_AUTHOR",
+      payload: { ...reqPayload }
+    });
   } catch (error) {}
 };
 

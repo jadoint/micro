@@ -13,6 +13,12 @@ export default (state = initialState, action) => {
         ...action.payload
       };
     }
+    case "UPDATE_ABOUT_AUTHOR": {
+      return {
+        ...state,
+        ...action.payload
+      };
+    }
     case "RESET_ABOUT_STATE": {
       return { ...initialState };
     }

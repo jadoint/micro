@@ -51,8 +51,7 @@ const About = () => {
   const doSubmit = e => {
     e.preventDefault();
     dispatch(
-      updateAboutAuthor({
-        id: idAuthor,
+      updateAboutAuthor(idAuthor, {
         title: inputState.title,
         about: inputState.about
       })
