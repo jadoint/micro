@@ -27,3 +27,6 @@ node_modules/
 
 # Docker compose yaml
 docker-compose.yml
+
+# Ignore all build executables
+cmd/*/*_service
