@@ -1,8 +1,0 @@
-version: "2.1"
-
-services:
-  micro:
-    image: micro-user
-    build: .
-    ports:
-      - 3400:3306

@@ -24,3 +24,6 @@
 
 # Node modules
 node_modules/
+
+# Docker compose yaml
+docker-compose.yml

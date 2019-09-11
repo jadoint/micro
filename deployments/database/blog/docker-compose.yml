@@ -1,8 +1,0 @@
-version: "2.1"
-
-services:
-  micro:
-    image: micro-blog
-    build: .
-    ports:
-      - 3401:3306
