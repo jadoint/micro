@@ -1,0 +1,35 @@
+version: "3"
+
+services:
+  micro-user:
+    image: dockerhub_name/micro-user:0.1
+    build:
+      context: ./user
+    ports:
+      - "3400:3306"
+    volumes:
+      - /mnt/micro/mysql/micro-user/data:/var/lib/mysql
+      - /mnt/micro/mysql/micro-user/backups:/backups
+    environment:
+      - MYSQL_ROOT_PASSWORD=yourrootpassword
+      - MYSQL_DATABASE=user
+      - MYSQL_USER=microuser
+      - MYSQL_PASSWORD=youruserpassword
+      - MYSQL_ALLOW_EMPTY_PASSWORD=no
+    restart: always
+  micro-blog:
+    image: dockerhub_name/micro-blog:0.1
+    build:
+      context: ./blog
+    ports:
+      - "3401:3306"
+    volumes:
+      - /mnt/micro/mysql/micro-blog/data:/var/lib/mysql
+      - /mnt/micro/mysql/micro-blog/backups:/backups
+    environment:
+      - MYSQL_ROOT_PASSWORD=yourrootpassword
+      - MYSQL_DATABASE=blog
+      - MYSQL_USER=microuser
+      - MYSQL_PASSWORD=youruserpassword
+      - MYSQL_ALLOW_EMPTY_PASSWORD=no
+    restart: always

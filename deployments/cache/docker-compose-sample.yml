@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  micro-redis:
+    image: dockerhub_name/micro-redis:0.1
+    build:
+      context: ./
+    ports:
+      - "6379:6379"
+    restart: always
