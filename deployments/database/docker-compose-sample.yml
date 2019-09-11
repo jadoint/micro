@@ -6,7 +6,7 @@ services:
     build:
       context: ./user
     ports:
-      - "3400:3306"
+      - "127.0.0.1:3400:3306"
     volumes:
       - /mnt/micro/mysql/micro-user/data:/var/lib/mysql
       - /mnt/micro/mysql/micro-user/backups:/backups
@@ -22,7 +22,7 @@ services:
     build:
       context: ./blog
     ports:
-      - "3401:3306"
+      - "127.0.0.1:3401:3306"
     volumes:
       - /mnt/micro/mysql/micro-blog/data:/var/lib/mysql
       - /mnt/micro/mysql/micro-blog/backups:/backups

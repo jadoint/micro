@@ -152,95 +152,108 @@ const BlogView = props => {
                       )}
                     </Fragment>
                   )}
-                  <Typography
-                    component="h1"
-                    variant="h4"
-                    color="inherit"
-                    gutterBottom
-                  >
-                    {title}
-                  </Typography>
-                  {idAuthor > 0 && (
+                  {!idAuthor ? (
+                    <Typography variant="body1" color="textSecondary" paragraph>
+                      Nothing here yet...
+                    </Typography>
+                  ) : (
                     <Fragment>
-                      <Divider />
                       <Typography
-                        variant="body2"
-                        color="textSecondary"
-                        className={classes.topSpacer}
+                        component="h1"
+                        variant="h4"
+                        color="inherit"
+                        gutterBottom
                       >
-                        {created} by {author}
-                        {modified !== created && (
-                          <Typography variant="caption" color="textSecondary">
-                            {" "}
-                            (Updated {modified})
-                          </Typography>
-                        )}
+                        {title}
                       </Typography>
-                    </Fragment>
-                  )}
-                  {status && (
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      className={classes.topSpacer}
-                    >
-                      Status: {status}
-                    </Typography>
-                  )}
-                  <Typography variant="body2" color="textSecondary">
-                    {wordCount} words
-                  </Typography>
-                  <Typography
-                    className={classes.mainPostBody}
-                    dangerouslySetInnerHTML={createMarkup(post)}
-                  />
-                  {tags.length > 0 && idVisitor > 0 && idVisitor === idAuthor && (
-                    <Button
-                      href="#"
-                      variant="outlined"
-                      size="small"
-                      color="default"
-                      className={classes.button}
-                      onClick={e => {
-                        e.preventDefault();
-                        setShowTagDelete(!showTagDelete);
-                      }}
-                    >
-                      Manage Tags
-                    </Button>
-                  )}
-                  {tags.length > 0 && (
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      className={classes.topSpacer}
-                    >
-                      Tags:{" "}
-                      {tags.map(t => (
-                        <Fragment key={t}>
-                          {showTagDelete && (
-                            <Link
-                              href="#"
-                              color="secondary"
-                              className={classes.leftSpacer}
-                              onClick={e => doDeleteTag(e, t)}
-                            >
-                              <DeleteForeverIcon />
-                            </Link>
-                          )}{" "}
-                          <Link
-                            component={RouterLink}
-                            to={`/?pageNum=1&tag=${t}`}
-                            color="inherit"
+                      {idAuthor > 0 && (
+                        <Fragment>
+                          <Divider />
+                          <Typography
                             variant="body2"
-                            className={classes.rightSpacer}
-                            onClick={() => dispatch(fetchListingsByTag(t))}
+                            color="textSecondary"
+                            className={classes.topSpacer}
                           >
-                            {t}
-                          </Link>{" "}
+                            {created} by {author}
+                            {modified !== created && (
+                              <Typography
+                                variant="caption"
+                                color="textSecondary"
+                              >
+                                {" "}
+                                (Updated {modified})
+                              </Typography>
+                            )}
+                          </Typography>
                         </Fragment>
-                      ))}
-                    </Typography>
+                      )}
+                      {status && (
+                        <Typography
+                          variant="body2"
+                          color="textSecondary"
+                          className={classes.topSpacer}
+                        >
+                          Status: {status}
+                        </Typography>
+                      )}
+                      <Typography variant="body2" color="textSecondary">
+                        {wordCount} words
+                      </Typography>
+                      <Typography
+                        className={classes.mainPostBody}
+                        dangerouslySetInnerHTML={createMarkup(post)}
+                      />
+                      {tags.length > 0 &&
+                        idVisitor > 0 &&
+                        idVisitor === idAuthor && (
+                          <Button
+                            href="#"
+                            variant="outlined"
+                            size="small"
+                            color="default"
+                            className={classes.button}
+                            onClick={e => {
+                              e.preventDefault();
+                              setShowTagDelete(!showTagDelete);
+                            }}
+                          >
+                            Manage Tags
+                          </Button>
+                        )}
+                      {tags.length > 0 && (
+                        <Typography
+                          variant="body2"
+                          color="textSecondary"
+                          className={classes.topSpacer}
+                        >
+                          Tags:{" "}
+                          {tags.map(t => (
+                            <Fragment key={t}>
+                              {showTagDelete && (
+                                <Link
+                                  href="#"
+                                  color="secondary"
+                                  className={classes.leftSpacer}
+                                  onClick={e => doDeleteTag(e, t)}
+                                >
+                                  <DeleteForeverIcon />
+                                </Link>
+                              )}{" "}
+                              <Link
+                                component={RouterLink}
+                                to={`/?pageNum=1&tag=${t}`}
+                                color="inherit"
+                                variant="body2"
+                                className={classes.rightSpacer}
+                                onClick={() => dispatch(fetchListingsByTag(t))}
+                              >
+                                {t}
+                              </Link>{" "}
+                            </Fragment>
+                          ))}
+                        </Typography>
+                      )}
+                    </Fragment>
                   )}
                 </Fragment>
               )}
