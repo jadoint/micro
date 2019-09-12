@@ -35,3 +35,6 @@ cmd/*/*_service
 # Deploy scripts
 deploy-services.sh
 deploy-web.sh
+
+# Systemd configuration
+*.service

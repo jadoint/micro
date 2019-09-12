@@ -2,7 +2,6 @@ package route
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -97,7 +96,6 @@ func TagRouter(clients *conn.Clients) chi.Router {
 
 	r.Delete("/{idBlog:[0-9]+}/{tag}", func(w http.ResponseWriter, r *http.Request) {
 		idBlogParam, err := strconv.Atoi(chi.URLParam(r, "idBlog"))
-		fmt.Println(idBlogParam)
 		if err != nil {
 			http.Error(w, "", http.StatusBadRequest)
 			return

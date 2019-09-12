@@ -1,0 +1,33 @@
+# Place this file in /lib/systemd/system then run:
+# > chmod 755 blog.service
+# > systemctl enable blog.service
+# > systemctl start blog.service
+# Check for success:
+# > systemctl status blog.service
+[Unit]
+Description=blog_service
+ConditionPathExists=/home/youruser/deployments/bin/blog/blog_service
+After=network.target
+
+[Service]
+Type=simple
+User=youruser
+Group=youruser
+LimitNOFILE=1024
+
+Restart=on-failure
+RestartSec=10
+
+WorkingDirectory=/home/youruser/deployments/bin/blog
+ExecStart=/home/youruser/deployments/bin/blog/blog_service
+
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/log/blog_service
+ExecStartPre=/bin/chown syslog:adm /var/log/blog_service
+ExecStartPre=/bin/chmod 755 /var/log/blog_service
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=blog_service
+
+[Install]
+WantedBy=multi-user.target

@@ -82,7 +82,6 @@ func GetLatest(clients *conn.Clients, pageNum int, pageSize int) ([]*Blog, error
 
 // GetLatestByTag gets latest blogs posted by tag
 func GetLatestByTag(clients *conn.Clients, tag string, pageNum int, pageSize int) ([]*Blog, error) {
-	fmt.Println("tag", tag)
 	offset := paginate.GetOffset(pageNum, pageSize)
 	db := clients.DB.Read
 	rows, err := db.Query(`
