@@ -30,3 +30,6 @@ docker-compose.yml
 
 # Ignore all build executables
 cmd/*/*_service
+
+# Deploy script
+deploy-web.sh
