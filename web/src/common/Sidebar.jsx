@@ -30,8 +30,10 @@ const FrequentTags = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchFrequentTags());
-  }, [dispatch]);
+    if (!frequentTags || frequentTags.length === 0) {
+      dispatch(fetchFrequentTags());
+    }
+  }, [dispatch, frequentTags]);
 
   let frequentTagsView = null;
   if (frequentTags && frequentTags.length > 0) {
