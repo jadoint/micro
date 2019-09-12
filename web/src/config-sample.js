@@ -9,6 +9,7 @@ if (hostname === "localhost") {
   blogApiUrl = "http://localhost:8001/api/v1/blog";
 }
 
+const pageTitle = "David Ado";
 const headerTitle = "Micro Go Blog";
 
 const header = [
@@ -33,6 +34,7 @@ export default {
   blogApiUrl,
   photoUrl: "https://photo.sitename.com",
   thumbUrl: "https://photo.sitename.com/thumb_",
+  pageTitle,
   headerTitle,
   header,
   recaptchaKey

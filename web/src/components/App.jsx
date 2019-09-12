@@ -24,6 +24,7 @@ const store = createStore(reducers, applyMiddleware(thunk));
 
 const App = () => {
   useEffect(() => {
+    document.title = config.pageTitle;
     loadReCaptcha(config.recaptchaKey);
   });
 
