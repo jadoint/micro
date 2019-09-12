@@ -2,6 +2,7 @@ import React, { Fragment } from "react";
 import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
 
+import config from "../config";
 import useStyles from "../hooks/styles";
 import BackToTop from "./BackToTop";
 
@@ -13,7 +14,7 @@ const Footer = () => {
       <footer className={classes.footer}>
         <Container maxWidth="lg">
           <Typography variant="h6" align="center" gutterBottom>
-            Blob Loblaw's Go Blog
+            {config.footer.title}
           </Typography>
           <Typography
             variant="subtitle1"
@@ -21,7 +22,7 @@ const Footer = () => {
             color="textSecondary"
             component="p"
           >
-            Powered by Go microservices
+            {config.footer.subtitle}
           </Typography>
           <Copyright />
         </Container>
@@ -37,7 +38,7 @@ const Copyright = () => {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {"Copyright © "}
-      Micro {new Date().getFullYear()}
+      {config.footer.copyright} {new Date().getFullYear()}
     </Typography>
   );
 };

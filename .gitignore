@@ -18,6 +18,7 @@
 
 # Configuration and environment
 .env*
+config.js
 
 # Logs
 *.log

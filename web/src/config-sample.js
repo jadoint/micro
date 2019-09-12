@@ -18,7 +18,14 @@ const header = [
   { label: "Cache", tag: "cache", link: "/?tag=cache" }
 ];
 
-const recaptchaKey = "6LdSJrcUAAAAAFvw7xIl1pXg4cX2zu4WeNDkv7k0";
+const footer = {
+  title: "Micro Blog",
+  subtitle: "Powered by Go microservices",
+  copyright: "Micro"
+};
+
+// Get reCaptcha key from Google reCaptcha
+const recaptchaKey = "abcdefghijklmnopqrstuvwxyz123456";
 
 export default {
   authApiUrl,
