@@ -26,15 +26,18 @@ config.js
 # Node modules
 node_modules/
 
+# Web build
+web/build/
+
 # Docker compose yaml
 docker-compose.yml
 
 # Ignore all build executables
-cmd/*/*_service
+deployments/bin/*/*_service
+
+# Systemd configuration
+deployments/bin/*/*.service
 
 # Deploy scripts
 deploy-services.sh
 deploy-web.sh
-
-# Systemd configuration
-*.service
