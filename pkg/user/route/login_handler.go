@@ -15,8 +15,8 @@ import (
 )
 
 func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
-	visitor := visitor.GetVisitor(r)
-	if visitor.ID > 0 {
+	v := visitor.GetVisitor(r)
+	if v.ID > 0 {
 		errutil.Send(w, "Already logged in", http.StatusForbidden)
 		return
 	}

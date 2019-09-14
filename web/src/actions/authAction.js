@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import http from "../services/httpService";
 import config from "../config";
 
@@ -59,6 +60,30 @@ export const signup = ({ username, email, password, recaptchaToken }) => async (
       payload: { username: dbUsername }
     });
   } catch (error) {}
+};
+
+export const saveNewPassword = ({ oldPassword, newPassword }) => async (
+  dispatch,
+  getState
+) => {
+  try {
+    await http.post(`${config.authApiUrl}/new-password`, {
+      oldPassword,
+      newPassword
+    });
+
+    toast("Saved", { type: toast.TYPE.SUCCESS });
+  } catch (error) {}
+};
+
+export const getCredentials = () => async (dispatch, getState) => {
+  const res = await http.get(`${config.authApiUrl}`);
+
+  const { id: idVisitor, name: username } = res.data;
+  dispatch({
+    type: "GET_CREDENTIALS",
+    payload: { idVisitor, username }
+  });
 };
 
 export const setUsername = username => (dispatch, getState) => {

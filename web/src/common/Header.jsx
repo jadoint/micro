@@ -59,7 +59,15 @@ const Header = () => {
               variant="body2"
               style={{ marginRight: ".5rem" }}
             >
-              {username}
+              <Link
+                component={RouterLink}
+                to={`/profile/${username}`}
+                color="inherit"
+                variant="body2"
+                noWrap
+              >
+                {username}
+              </Link>
             </Typography>
             <Button
               onClick={() => dispatch(logout())}

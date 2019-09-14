@@ -17,6 +17,7 @@ import BlogCreate from "./blog/BlogCreate";
 import BlogEdit from "./blog/BlogEdit";
 import BlogList from "./blog/BlogList";
 import BlogView from "./blog/BlogView";
+import Profile from "./user/Profile";
 import reducers from "../reducers";
 import "./App.css";
 
@@ -41,6 +42,7 @@ const App = () => {
           <Route path="/blog/new" exact component={BlogCreate} />
           <Route path="/blog/edit/:id" component={BlogEdit} />
           <Route path="/blog/view/:id" component={BlogView} />
+          <Route path="/profile/:username" component={Profile} />
         </Container>
         <Footer />
       </Provider>

@@ -67,6 +67,12 @@ type Username struct {
 	Username string `json:"username" validate:"required,min=3,max=20,alphanum"`
 }
 
+// PasswordChange for a user changing passwords
+type PasswordChange struct {
+	OldPassword string `json:"oldPassword" validate:"required,min=6,max=255"`
+	NewPassword string `json:"newPassword" validate:"required,min=6,max=255"`
+}
+
 // GetUser gets single user including password
 func GetUser(clients *conn.Clients, idUser int64) (*User, error) {
 	db := clients.DB.Read
@@ -201,6 +207,26 @@ func AddUser(clients *conn.Clients, ur *Registration, rr *RecaptchaResponse) (in
 	}
 
 	return idUser, nil
+}
+
+// ChangePassword changes a user's password
+func ChangePassword(clients *conn.Clients, idUser int64, newPassword string) error {
+	passwordHash, err := auth.GenerateHash(newPassword)
+	if err != nil {
+		return err
+	}
+
+	_, err = clients.DB.Exec(`
+		UPDATE user
+		SET password = ?
+		WHERE id_user = ?
+		LIMIT 1`,
+		passwordHash, idUser)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // GetAbout gets user_profile details of a user

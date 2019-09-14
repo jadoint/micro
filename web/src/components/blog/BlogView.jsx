@@ -14,6 +14,7 @@ import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
 import createMarkup from "../../utils/createMarkup";
 import useStyles from "../../hooks/styles";
 import Sidebar from "../../common/Sidebar";
+import Nothing from "../../common/Nothing";
 import {
   fetchBlog,
   fetchAuthorName,
@@ -26,6 +27,7 @@ import {
   deleteTag,
   resetBlogTagsState
 } from "../../actions/tagAction";
+import { setAboutCredentials } from "../../actions/aboutAction";
 import { fetchListingsByTag } from "../../actions/listingsAction";
 
 const BlogView = props => {
@@ -78,6 +80,13 @@ const BlogView = props => {
     }
   }, [dispatch, idAuthor]);
 
+  // About
+  useEffect(() => {
+    if (idAuthor > 0 && author) {
+      dispatch(setAboutCredentials(idAuthor, author));
+    }
+  }, [dispatch, idAuthor, author]);
+
   const doSubmitTag = e => {
     e.preventDefault();
     dispatch(addTag(idPost, tag));
@@ -89,7 +98,7 @@ const BlogView = props => {
   };
 
   return (
-    <React.Fragment>
+    <Fragment>
       <Container maxWidth="lg">
         <main>
           <Grid container spacing={5} className={classes.mainGrid}>
@@ -153,9 +162,7 @@ const BlogView = props => {
                     </Fragment>
                   )}
                   {!idAuthor ? (
-                    <Typography variant="body1" color="textSecondary" paragraph>
-                      Nothing here yet...
-                    </Typography>
+                    <Nothing />
                   ) : (
                     <Fragment>
                       <Typography
@@ -262,7 +269,7 @@ const BlogView = props => {
           </Grid>
         </main>
       </Container>
-    </React.Fragment>
+    </Fragment>
   );
 };
 

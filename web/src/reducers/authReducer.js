@@ -17,6 +17,9 @@ export default (state = initialState, action) => {
     case "SIGNUP": {
       return { ...state, ...action.payload };
     }
+    case "GET_CREDENTIALS": {
+      return { ...state, ...action.payload };
+    }
     case "SET_USERNAME": {
       return { ...state, ...action.payload };
     }

@@ -2,39 +2,46 @@ import { toast } from "react-toastify";
 import config from "../config";
 import http from "../services/httpService";
 
-export const fetchAboutAuthor = idAuthor => async (dispatch, getState) => {
+export const fetchAboutUser = idUser => async (dispatch, getState) => {
   try {
-    const res = await http.get(`${config.userApiUrl}/about/${idAuthor}`);
+    const res = await http.get(`${config.userApiUrl}/about/${idUser}`);
 
     dispatch({
-      type: "FETCH_ABOUT_AUTHOR",
+      type: "FETCH_ABOUT_USER",
       payload: { ...res.data }
     });
   } catch (error) {}
 };
 
-export const updateAboutAuthor = (idAuthor, reqPayload) => async (
+export const updateAboutUser = (idUser, reqPayload) => async (
   dispatch,
   getState
 ) => {
   try {
-    await http.put(`${config.userApiUrl}/about/${idAuthor}`, reqPayload);
+    await http.put(`${config.userApiUrl}/about/${idUser}`, reqPayload);
     toast("Saved", { type: toast.TYPE.SUCCESS });
 
     dispatch({
-      type: "UPDATE_ABOUT_AUTHOR",
+      type: "UPDATE_ABOUT_USER",
       payload: { ...reqPayload }
     });
   } catch (error) {}
 };
 
-export const deleteAboutAuthor = idAuthor => async (dispatch, getState) => {
+export const deleteAboutUser = idUser => async (dispatch, getState) => {
   try {
-    await http.delete(`${config.userApiUrl}/about/${idAuthor}`);
+    await http.delete(`${config.userApiUrl}/about/${idUser}`);
     toast("Deleted", { type: toast.TYPE.INFO });
 
-    dispatch(fetchAboutAuthor(idAuthor));
+    dispatch(fetchAboutUser(idUser));
   } catch (error) {}
+};
+
+export const setAboutCredentials = (idUser, username) => (
+  dispatch,
+  getState
+) => {
+  dispatch({ type: "SET_ABOUT_CREDENTIALS", payload: { idUser, username } });
 };
 
 export const resetAboutState = () => (dispatch, getState) => {

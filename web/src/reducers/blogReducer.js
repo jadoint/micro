@@ -25,6 +25,9 @@ export default (state = initialState, action) => {
     case "FETCH_AUTHOR_NAME": {
       return { ...state, ...action.payload };
     }
+    case "SET_ID_AUTHOR": {
+      return { ...state, ...action.payload };
+    }
     case "UPDATE_TITLE": {
       return { ...state, ...action.payload };
     }

@@ -14,6 +14,7 @@ import config from "../../config";
 import useStyles from "../../hooks/styles";
 import Sidebar from "../../common/Sidebar";
 import Pagination from "../../common/Pagination";
+import Nothing from "../../common/Nothing";
 import {
   fetchListings,
   fetchAuthors,
@@ -144,11 +145,7 @@ const Filter = ({ tagFilter, classes }) => {
 const Listings = ({ listings, classes }) => {
   const authors = useSelector(state => state.listingsReducer.authors);
   if (!listings) {
-    return (
-      <Typography variant="body1" color="textSecondary" paragraph>
-        Nothing here yet...
-      </Typography>
-    );
+    return <Nothing />;
   }
 
   return (
