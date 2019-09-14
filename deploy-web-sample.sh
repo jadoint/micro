@@ -1,17 +1,15 @@
 #!/bin/bash
 
+# Create production build
+cd web
+yarn build
+
 # Upload to server
-ssh host 'rm -rf web/public;rm -rf web/src;rm web/package.json'
-scp -r web/public youruser@host:~/web/public &
-scp -r web/src youruser@host:~/web/src &
-scp -r web/package.json youruser@host:~/web/package.json &
-wait
+ssh host 'mkdir -p web/{build,new_build}'
+scp -r build/* youruser@host:~/web/new_build
 
-# Install node modules
-ssh host 'cd web;yarn install'
-
-# Leave build directory last to minimize site downtime
-ssh host 'rm -rf web/build'
-ssh host 'cd web;yarn build'
+# Swap old build and new build directories
+# then delete old build (to minimize downtime).
+ssh host 'cd web;mv build old_build;mv new_build build;rm -rf old_build'
 
 echo "All done"
