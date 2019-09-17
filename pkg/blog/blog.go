@@ -191,6 +191,30 @@ func Get(clients *conn.Clients, idBlog int64) (*Blog, error) {
 	return &b, nil
 }
 
+// GetPostInit gets blog settings and credentials used
+// for retrieving details from GetPost.
+func GetPostInit(clients *conn.Clients, idBlog int64) (*Blog, error) {
+	db := clients.DB.Read
+	var b Blog
+	err := db.QueryRow(`
+		SELECT b.id_blog, b.id_author, b.modified,
+			bs.is_unlisted, bs.is_draft
+		FROM blog AS b
+		INNER JOIN blog_settings AS bs ON b.id_blog = bs.id_blog
+		WHERE b.id_blog = ?
+		LIMIT 1
+		# GetPostInit`, idBlog).
+		Scan(&b.ID, &b.IDAuthor, &b.Modified,
+			&b.IsUnlisted, &b.IsDraft)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			logger.HandleError(err)
+		}
+		return &b, err
+	}
+	return &b, nil
+}
+
 // GetPost gets single blog post
 func GetPost(clients *conn.Clients, idBlog int64) (*Blog, error) {
 	db := clients.DB.Read

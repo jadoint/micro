@@ -8,7 +8,7 @@ export const fetchTags = (idPost, modifiedDatetime) => async (
 ) => {
   try {
     const res = await http.get(
-      `${config.blogApiUrl}/tag/${idPost}/blog_tag_${modifiedDatetime}.json`
+      `${config.blogApiUrl}/tag/${idPost}/blogtag_${idPost}_${modifiedDatetime}.json`
     );
 
     dispatch({

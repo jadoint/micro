@@ -2,23 +2,30 @@ import http from "../services/httpService";
 import config from "../config";
 import { toast } from "react-toastify";
 
-export const fetchBlog = idPost => async (dispatch, getState) => {
+export const fetchBlog = id => async (dispatch, getState) => {
   try {
     dispatch({
       type: "IS_LOADING",
       payload: { isLoading: true }
     });
 
-    const res = await http.get(`${config.blogApiUrl}/${idPost}`);
+    const resInit = await http.get(`${config.blogApiUrl}/${id}`);
 
-    const { isDraft, isUnlisted } = res.data;
+    const { idPost, modifiedDatetime, isDraft, isUnlisted } = resInit.data;
     let status = "";
     if (isDraft) status += "Draft ";
     if (isUnlisted) status += "Unlisted ";
 
+    let res = { data: {} };
+    if (idPost && modifiedDatetime) {
+      res = await http.get(
+        `${config.blogApiUrl}/${idPost}/blog_${idPost}_${modifiedDatetime}.json`
+      );
+    }
+
     dispatch({
       type: "FETCH_BLOG",
-      payload: { ...res.data, status, isLoading: false }
+      payload: { ...resInit.data, ...res.data, status, isLoading: false }
     });
   } catch (error) {
     dispatch({

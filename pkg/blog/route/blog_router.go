@@ -32,9 +32,50 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		}
 		idBlog := int64(idBlogParam)
 
-		visitor := visitor.GetVisitor(r)
+		v := visitor.GetVisitor(r)
 
-		b, err := blog.Get(clients, idBlog)
+		b, err := blog.GetPostInit(clients, idBlog)
+		if err != nil {
+			http.Error(w, "", http.StatusNotFound)
+			return
+		}
+
+		// Format date/time
+		t, _ := time.Parse("2006-01-02 15:04:05", b.Modified)
+		b.Modified = t.Format("January 02, 2006")
+		b.ModifiedDatetime = t.Format("20060102150405")
+
+		// Authorization
+		if b.IsDraft && b.IDAuthor != v.ID {
+			http.Error(w, "", http.StatusUnauthorized)
+			return
+		}
+
+		res, err := json.Marshal(struct {
+			*blog.Blog
+			IDVisitor int64 `json:"idVisitor,omitempty"`
+		}{
+			b,
+			v.ID,
+		})
+		if err != nil {
+			logger.Panic(err.Error(), "Get Blog ID", idBlog)
+		}
+
+		w.Write(res)
+	})
+
+	r.Get("/{idBlog:[0-9]+}/{jsonName:[a-z0-9_.]+}", func(w http.ResponseWriter, r *http.Request) {
+		idBlogParam, err := strconv.Atoi(chi.URLParam(r, "idBlog"))
+		if err != nil {
+			http.Error(w, "", http.StatusUnauthorized)
+			return
+		}
+		idBlog := int64(idBlogParam)
+
+		v := visitor.GetVisitor(r)
+
+		b, err := blog.GetPost(clients, idBlog)
 		if err != nil {
 			http.Error(w, "", http.StatusNotFound)
 			return
@@ -48,7 +89,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		b.ModifiedDatetime = t.Format("20060102150405")
 
 		// Authorization
-		if b.IsDraft && b.IDAuthor != visitor.ID {
+		if b.IsDraft && b.IDAuthor != v.ID {
 			http.Error(w, "", http.StatusUnauthorized)
 			return
 		}
@@ -58,7 +99,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 			IDVisitor int64 `json:"idVisitor,omitempty"`
 		}{
 			b,
-			visitor.ID,
+			v.ID,
 		})
 		if err != nil {
 			logger.Panic(err.Error(), "Get Blog ID", idBlog)
@@ -68,8 +109,8 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 	})
 
 	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
-		visitor := visitor.GetVisitor(r)
-		if visitor.ID == 0 {
+		v := visitor.GetVisitor(r)
+		if v.ID == 0 {
 			http.Error(w, "", http.StatusUnauthorized)
 			return
 		}
@@ -81,7 +122,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		var b blog.Blog
 		err := d.Decode(&b)
 		logger.HandleError(err)
-		b.IDAuthor = visitor.ID
+		b.IDAuthor = v.ID
 		// Strip title of all tags
 		strict := clean.Strict()
 		b.Title = strict.Sanitize(b.Title)
