@@ -31,3 +31,11 @@ Debian/Ubuntu setup: To install the binaries as a service to be managed by `syst
 ### React Setup
 
 Copy `deploy-web-sample.sh` to `deploy-web.sh` and configure settings according to your environment. Running this scripts creates a production-ready build of the React application (runs `yarn build` in `/web`) and uploads it to your server.
+
+## Development
+
+`/cmd` is the entrypoint for each service so you can run `go run cmd/blog/main.go` and `go run cmd/user/main.go` during development.
+
+`/pkg` contains all internal packages that can be imported (i.e. you're going to be writing most of your Go code in here).
+
+`/web` contains frontend code like React components and public files.
