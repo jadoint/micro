@@ -240,7 +240,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 	})
 
 	// Blog views
-	r.Get("/views/{idBlog:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+	r.Put("/views/{idBlog:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 		idBlogParam, err := strconv.Atoi(chi.URLParam(r, "idBlog"))
 		if err != nil {
 			http.Error(w, "", http.StatusUnauthorized)

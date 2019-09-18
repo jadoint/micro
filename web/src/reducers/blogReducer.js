@@ -5,6 +5,7 @@ const initialState = {
   title: "",
   post: "",
   wordCount: 0,
+  views: 0,
   created: "",
   modified: "",
   modifiedDatetime: "",
@@ -38,6 +39,9 @@ export default (state = initialState, action) => {
       return { ...state, ...action.payload };
     }
     case "UPDATE_IS_UNLISTED": {
+      return { ...state, ...action.payload };
+    }
+    case "INCR_VIEWS": {
       return { ...state, ...action.payload };
     }
     case "IS_LOADING": {

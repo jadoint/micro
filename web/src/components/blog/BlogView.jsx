@@ -18,7 +18,8 @@ import Nothing from "../../common/Nothing";
 import {
   fetchBlog,
   fetchAuthorName,
-  resetBlogState
+  resetBlogState,
+  incrViews
 } from "../../actions/blogAction";
 import {
   fetchTags,
@@ -41,6 +42,7 @@ const BlogView = props => {
   const title = useSelector(state => state.blogReducer.title);
   const post = useSelector(state => state.blogReducer.post);
   const wordCount = useSelector(state => state.blogReducer.wordCount);
+  const views = useSelector(state => state.blogReducer.views);
   const created = useSelector(state => state.blogReducer.created);
   const modified = useSelector(state => state.blogReducer.modified);
   const modifiedDatetime = useSelector(
@@ -59,14 +61,17 @@ const BlogView = props => {
 
   const { id } = props.match.params;
 
+  // Get blog post
   useEffect(() => {
     dispatch(fetchBlog(id, props));
   }, [dispatch, props, id]);
 
+  // Get tags
   useEffect(() => {
     if (modifiedDatetime) dispatch(fetchTags(id, modifiedDatetime));
   }, [dispatch, props, id, modifiedDatetime]);
 
+  // Reset state on unmount
   useEffect(() => {
     return () => {
       dispatch(resetBlogState());
@@ -74,11 +79,19 @@ const BlogView = props => {
     };
   }, [dispatch]);
 
+  // Author name
   useEffect(() => {
     if (idAuthor > 0) {
       dispatch(fetchAuthorName(idAuthor));
     }
   }, [dispatch, idAuthor]);
+
+  // Increment view count
+  useEffect(() => {
+    if (idPost > 0) {
+      dispatch(incrViews(idPost));
+    }
+  }, [dispatch, idPost]);
 
   // About
   useEffect(() => {
@@ -87,11 +100,13 @@ const BlogView = props => {
     }
   }, [dispatch, idAuthor, author]);
 
+  // Submit tag
   const doSubmitTag = e => {
     e.preventDefault();
     dispatch(addTag(idPost, tag));
   };
 
+  // Delete tag
   const doDeleteTag = (e, deletedTag) => {
     e.preventDefault();
     dispatch(deleteTag(idPost, deletedTag));
@@ -204,7 +219,7 @@ const BlogView = props => {
                         </Typography>
                       )}
                       <Typography variant="body2" color="textSecondary">
-                        {wordCount} words
+                        {wordCount} words | {views} views
                       </Typography>
                       <Typography
                         className={classes.mainPostBody}

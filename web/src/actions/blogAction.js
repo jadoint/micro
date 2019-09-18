@@ -130,6 +130,17 @@ export const updateBlog = async reqPayload => {
   } catch (error) {}
 };
 
+export const incrViews = idPost => async (dispatch, getState) => {
+  try {
+    const res = await http.put(`${config.blogApiUrl}/views/${idPost}`);
+
+    dispatch({
+      type: "INCR_VIEWS",
+      payload: { ...res.data }
+    });
+  } catch (error) {}
+};
+
 export const resetBlogState = () => (dispatch, getState) => {
   dispatch({
     type: "RESET_BLOG_STATE",
