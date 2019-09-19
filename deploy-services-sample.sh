@@ -5,9 +5,10 @@ env GOOS=linux GOARCH=amd64 go build -o deployments/bin/blog/blog_service cmd/bl
 env GOOS=linux GOARCH=amd64 go build -o deployments/bin/user/user_service cmd/user/main.go
 
 # Upload to server
-ssh host 'mkdir -p deployments/{bin,new_bin,cache}'
+ssh host 'mkdir -p deployments/{bin,new_bin,cache,tls}'
 scp -r deployments/bin/* youruser@host:~/deployments/new_bin &
 scp -r deployments/cache/* youruser@host:~/deployments/cache &
+scp -r deployments/tls/* youruser@host:~/deployments/tls &
 wait
 
 # Swap old bin and new bin directories

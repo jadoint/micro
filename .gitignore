@@ -41,3 +41,7 @@ deployments/bin/*/*.service
 # Deploy scripts
 deploy-services.sh
 deploy-web.sh
+
+# Ignore TLS files
+site.key
+site.pem
