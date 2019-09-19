@@ -4,9 +4,9 @@ let authApiUrl = "https://www.sitename.com/api/v1/auth";
 let userApiUrl = "https://www.sitename.com/api/v1/user";
 let blogApiUrl = "https://www.sitename.com/api/v1/blog";
 if (hostname === "localhost") {
-  authApiUrl = "http://localhost:8000/api/v1/auth";
-  userApiUrl = "http://localhost:8000/api/v1/user";
-  blogApiUrl = "http://localhost:8001/api/v1/blog";
+  authApiUrl = "https://localhost:8000/api/v1/auth";
+  userApiUrl = "https://localhost:8000/api/v1/user";
+  blogApiUrl = "https://localhost:8001/api/v1/blog";
 }
 
 const pageTitle = "David Ado";
