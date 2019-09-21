@@ -73,8 +73,6 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		}
 		idBlog := int64(idBlogParam)
 
-		v := visitor.GetVisitor(r)
-
 		b, err := blog.GetPost(clients, idBlog)
 		if err != nil {
 			http.Error(w, "", http.StatusNotFound)
@@ -87,12 +85,6 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		t, _ = time.Parse("2006-01-02 15:04:05", b.Modified)
 		b.Modified = t.Format("January 02, 2006")
 		b.ModifiedDatetime = t.Format("20060102150405")
-
-		// Authorization
-		if b.IsDraft && b.IDAuthor != v.ID {
-			http.Error(w, "", http.StatusUnauthorized)
-			return
-		}
 
 		res, err := json.Marshal(struct{ *blog.Blog }{b})
 		if err != nil {
