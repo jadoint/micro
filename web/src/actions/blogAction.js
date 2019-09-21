@@ -16,12 +16,9 @@ export const fetchBlog = id => async (dispatch, getState) => {
     if (isDraft) status += "Draft ";
     if (isUnlisted) status += "Unlisted ";
 
-    let res = { data: {} };
-    if (idPost && modifiedDatetime) {
-      res = await http.get(
-        `${config.blogApiUrl}/${idPost}/blog_${idPost}_${modifiedDatetime}.json`
-      );
-    }
+    const res = await http.get(
+      `${config.blogApiUrl}/${idPost}/blog_${idPost}_${modifiedDatetime}.json`
+    );
 
     dispatch({
       type: "FETCH_BLOG",
@@ -57,12 +54,9 @@ export const fetchBlogWithAuth = (id, props) => async (dispatch, getState) => {
       props.history.replace("/");
     }
 
-    let res = { data: {} };
-    if (idPost && modifiedDatetime) {
-      res = await http.get(
-        `${config.blogApiUrl}/${idPost}/blog_${idPost}_${modifiedDatetime}.json`
-      );
-    }
+    const res = await http.get(
+      `${config.blogApiUrl}/${idPost}/blog_${idPost}_${modifiedDatetime}.json`
+    );
 
     dispatch({
       type: "FETCH_BLOG",
