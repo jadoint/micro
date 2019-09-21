@@ -94,13 +94,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 			return
 		}
 
-		res, err := json.Marshal(struct {
-			*blog.Blog
-			IDVisitor int64 `json:"idVisitor,omitempty"`
-		}{
-			b,
-			v.ID,
-		})
+		res, err := json.Marshal(struct{ *blog.Blog }{b})
 		if err != nil {
 			logger.Panic(err.Error(), "Get Blog ID", idBlog)
 		}
