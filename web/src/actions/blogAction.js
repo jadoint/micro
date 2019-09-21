@@ -60,7 +60,7 @@ export const fetchBlogWithAuth = (id, props) => async (dispatch, getState) => {
 
     dispatch({
       type: "FETCH_BLOG",
-      payload: { ...res.data, isLoading: false }
+      payload: { ...resInit.data, ...res.data, isLoading: false }
     });
   } catch (error) {
     dispatch({
