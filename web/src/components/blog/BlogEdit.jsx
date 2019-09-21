@@ -13,7 +13,6 @@ import CKEditor from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import LinearProgress from "@material-ui/core/LinearProgress";
 
-import config from "../../config";
 import useStyles from "../../hooks/styles";
 import Sidebar from "../../common/Sidebar";
 import useLoginRestrict from "../../hooks/useLoginRestrict";
@@ -42,7 +41,7 @@ const BlogEdit = props => {
 
   useEffect(() => {
     const { id } = props.match.params;
-    dispatch(fetchBlogWithAuth(`${config.blogApiUrl}/${id}`, props));
+    dispatch(fetchBlogWithAuth(id, props));
   }, [dispatch, props]);
 
   const doSubmit = e => {

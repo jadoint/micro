@@ -35,33 +35,39 @@ export const fetchBlog = id => async (dispatch, getState) => {
   }
 };
 
-export const fetchBlogWithAuth = (endpoint, props) => async (
-  dispatch,
-  getState
-) => {
+export const fetchBlogWithAuth = (id, props) => async (dispatch, getState) => {
   try {
     dispatch({
       type: "IS_LOADING",
       payload: { isLoading: true }
     });
 
-    const res = await http.get(endpoint);
+    const resInit = await http.get(`${config.blogApiUrl}/${id}`);
 
-    if (res.data.idAuthor !== res.data.idVisitor) {
+    const { idPost, modifiedDatetime, idAuthor, idVisitor } = resInit.data;
+
+    if (idAuthor !== idVisitor) {
       toast("You are unauthorized for this action.", {
         type: toast.TYPE.ERROR
       });
       dispatch({
-        type: "FETCH_BLOG",
+        type: "IS_LOADING",
         payload: { isLoading: false }
       });
       props.history.replace("/");
-    } else {
-      dispatch({
-        type: "FETCH_BLOG",
-        payload: { ...res.data, isLoading: false }
-      });
     }
+
+    let res = { data: {} };
+    if (idPost && modifiedDatetime) {
+      res = await http.get(
+        `${config.blogApiUrl}/${idPost}/blog_${idPost}_${modifiedDatetime}.json`
+      );
+    }
+
+    dispatch({
+      type: "FETCH_BLOG",
+      payload: { ...res.data, isLoading: false }
+    });
   } catch (error) {
     dispatch({
       type: "FETCH_BLOG",
