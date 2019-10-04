@@ -12,8 +12,8 @@ import (
 	"github.com/jadoint/micro/pkg/clean"
 	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/errutil"
+	"github.com/jadoint/micro/pkg/fmtdate"
 	"github.com/jadoint/micro/pkg/logger"
-	"github.com/jadoint/micro/pkg/now"
 	"github.com/jadoint/micro/pkg/paginate"
 	"github.com/jadoint/micro/pkg/validate"
 	"github.com/jadoint/micro/pkg/visitor"
@@ -172,7 +172,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		ugc := clean.UGC()
 		b.Post = ugc.Sanitize(b.Post)
 		b.WordCount = words.Count(&b.Post)
-		b.Modified = now.MySQLUTC()
+		b.Modified = fmtdate.MySQLUTCNow()
 		// Privacy
 		if b.IsDraft {
 			b.IsUnlisted = true

@@ -13,7 +13,7 @@ import (
 	"github.com/jadoint/micro/pkg/blog"
 	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/db"
-	"github.com/jadoint/micro/pkg/now"
+	"github.com/jadoint/micro/pkg/fmtdate"
 	"github.com/jadoint/micro/pkg/validate"
 )
 
@@ -226,7 +226,7 @@ func TestUpdateBlogSuccess(t *testing.T) {
 		WordCount:  2,
 		IsUnlisted: true,
 		IsDraft:    true,
-		Modified:   now.MySQLUTC(),
+		Modified:   fmtdate.MySQLUTCNow(),
 	}
 	postFields := fmt.Sprintf(`{"title": "%s", "post": "%s", "isUnlisted": %t, "isDraft": %t}`, test.Title, test.Post, test.IsUnlisted, test.IsDraft)
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer([]byte(postFields)))
@@ -273,7 +273,7 @@ func TestUpdateBlogSuccess(t *testing.T) {
 		WordCount:  2,
 		IsUnlisted: true,
 		IsDraft:    true,
-		Modified:   now.MySQLUTC(),
+		Modified:   fmtdate.MySQLUTCNow(),
 	}
 
 	if b.ID != test.ID {

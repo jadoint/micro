@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/jadoint/micro/pkg/now"
+	"github.com/jadoint/micro/pkg/fmtdate"
 
 	// Standard anonymous sql driver import
 	_ "github.com/go-sql-driver/mysql"
@@ -25,7 +25,7 @@ type Tag struct {
 
 // TagCSV contains data from blog_tags table
 type TagCSV struct {
-	Tags sql.NullString `db:"tags,omitempty" jason:"tags,omitempty"`
+	Tags sql.NullString `db:"tags,omitempty" json:"tags,omitempty"`
 }
 
 // Validate a tag
@@ -104,8 +104,8 @@ func SetTagsCSV(tx *sql.Tx, idBlog int64, tagCsv string) error {
 		VALUES(?, ?, ?)
 		ON DUPLICATE KEY UPDATE
 		tags = ?, modified = ?`,
-		idBlog, tagCsv, now.MySQLUTC(),
-		tagCsv, now.MySQLUTC())
+		idBlog, tagCsv, fmtdate.MySQLUTCNow(),
+		tagCsv, fmtdate.MySQLUTCNow())
 	if err != nil {
 		tx.Rollback()
 		return err

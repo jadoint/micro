@@ -10,6 +10,7 @@ import (
 
 	// Standard anonymous sql driver import
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jadoint/micro/pkg/logger"
 )
 
 var dsn string
@@ -18,6 +19,44 @@ var dsn string
 type ClientDB struct {
 	Master *sql.DB
 	Read   *sql.DB
+}
+
+// Exec a CREATE/UPDATE/DELETE command on master
+func (db *ClientDB) Exec(query string, args ...interface{}) (sql.Result, error) {
+	res, err := db.Master.Exec(query, args...)
+	if err != nil {
+		return res, err
+	}
+	return res, nil
+}
+
+// MakeCSV creates a CSV string from a list of IDs resulting from a query
+func (db *ClientDB) MakeCSV(query string, args ...interface{}) (string, error) {
+	rows, err := db.Read.Query(query, args...)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+
+	var id int64
+	csv := ""
+	for rows.Next() {
+		err := rows.Scan(&id)
+		if err != nil {
+			if err != sql.ErrNoRows {
+				logger.HandleError(err)
+			}
+			return "", err
+		}
+		csv = csv + fmt.Sprintf(",%d", id)
+	}
+	if err = rows.Err(); err != nil {
+		return "", err
+	}
+	if csv != "" {
+		csv = csv[1:]
+	}
+	return csv, nil
 }
 
 func buildDSN(dbHost string) string {
@@ -74,14 +113,4 @@ func GetClient() (*ClientDB, error) {
 		Master: master,
 		Read:   read,
 	}, nil
-}
-
-// Exec a CREATE/UPDATE/DELETE command on master
-func (db *ClientDB) Exec(query string, args ...interface{}) (sql.Result, error) {
-	dbMaster := db.Master
-	res, err := dbMaster.Exec(query, args...)
-	if err != nil {
-		return res, err
-	}
-	return res, nil
 }
