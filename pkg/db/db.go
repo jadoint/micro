@@ -53,10 +53,10 @@ func (db *ClientDB) MakeCSV(query string, args ...interface{}) (string, error) {
 	if err = rows.Err(); err != nil {
 		return "", err
 	}
-	if csv != "" {
-		csv = csv[1:]
+	if csv == "" {
+		return "", sql.ErrNoRows
 	}
-	return csv, nil
+	return csv[1:], nil
 }
 
 func buildDSN(dbHost string) string {
