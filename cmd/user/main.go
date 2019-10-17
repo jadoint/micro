@@ -15,8 +15,8 @@ import (
 	"github.com/jadoint/micro/pkg/db"
 	"github.com/jadoint/micro/pkg/env"
 	"github.com/jadoint/micro/pkg/logger"
-	appmiddleware "github.com/jadoint/micro/pkg/middleware"
 	"github.com/jadoint/micro/pkg/user/route"
+	"github.com/jadoint/micro/pkg/visitor"
 )
 
 func main() {
@@ -65,7 +65,7 @@ func main() {
 	if os.Getenv("ENV") == "development" {
 		r.Use(middleware.SetHeader("Access-Control-Allow-Origin", os.Getenv("SITE_URL")))
 	}
-	r.Use(appmiddleware.Middleware)
+	r.Use(visitor.Middleware)
 
 	startPath := fmt.Sprintf(`/%s/`, os.Getenv("START_PATH"))
 	r.Mount(startPath+"auth", route.AuthRouter(clients))
