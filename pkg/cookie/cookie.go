@@ -1,4 +1,4 @@
-package auth
+package cookie
 
 import (
 	"net/http"
@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-// AddCookie adds cookie to a visitor's browser
-func AddCookie(w http.ResponseWriter, name string, value string) {
-	env := os.Getenv("ENV")
-	isSecure := true
-	if env == "development" {
-		isSecure = false
+// Add adds cookie to a visitor's browser
+func Add(w http.ResponseWriter, name string, value string) {
+	isSecureCookie := os.Getenv("IS_SECURE_COOKIE")
+	isSecure := false
+	if isSecureCookie == "true" {
+		isSecure = true
 	}
 	expire := time.Now().AddDate(1, 0, 0)
 	cookie := http.Cookie{
@@ -25,8 +25,8 @@ func AddCookie(w http.ResponseWriter, name string, value string) {
 	http.SetCookie(w, &cookie)
 }
 
-// RemoveCookie removes specific cookie from a visitor's browser
-func RemoveCookie(w http.ResponseWriter, name string) {
+// Remove removes specific cookie from a visitor's browser
+func Remove(w http.ResponseWriter, name string) {
 	expire := time.Now().AddDate(-1, 0, 0)
 	cookie := http.Cookie{
 		Name:    name,

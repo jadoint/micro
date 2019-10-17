@@ -10,8 +10,8 @@ import (
 	// Standard anonymous sql driver import
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/jadoint/micro/pkg/auth"
 	"github.com/jadoint/micro/pkg/conn"
+	"github.com/jadoint/micro/pkg/hash"
 	"github.com/jadoint/micro/pkg/logger"
 )
 
@@ -177,7 +177,7 @@ func GetUsernames(clients *conn.Clients, uids *IDs) ([]*Username, error) {
 
 // AddUser inserts user into user table
 func AddUser(clients *conn.Clients, ur *Registration, rr *RecaptchaResponse) (int64, error) {
-	passwordHash, err := auth.GenerateHash(ur.Password)
+	passwordHash, err := hash.Generate(ur.Password)
 	if err != nil {
 		return 0, err
 	}
@@ -211,7 +211,7 @@ func AddUser(clients *conn.Clients, ur *Registration, rr *RecaptchaResponse) (in
 
 // ChangePassword changes a user's password
 func ChangePassword(clients *conn.Clients, idUser int64, newPassword string) error {
-	passwordHash, err := auth.GenerateHash(newPassword)
+	passwordHash, err := hash.Generate(newPassword)
 	if err != nil {
 		return err
 	}

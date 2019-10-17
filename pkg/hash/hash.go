@@ -1,4 +1,4 @@
-package auth
+package hash
 
 import (
 	"crypto/rand"
@@ -36,8 +36,8 @@ var (
 	ErrIncompatibleVersion = errors.New("Incompatible version of argon2")
 )
 
-// GenerateHash generate hash from password
-func GenerateHash(password string) (string, error) {
+// Generate generate hash from password
+func Generate(password string) (string, error) {
 	p := defaultParams
 
 	// Generate a cryptographically secure random salt.
@@ -71,8 +71,8 @@ func generateRandomBytes(n uint32) ([]byte, error) {
 	return b, nil
 }
 
-// VerifyPasswordHash verifies that posted password matches existing password hash
-func VerifyPasswordHash(password, encodedHash string) (match bool, err error) {
+// VerifyPassword verifies that posted password matches existing password hash
+func VerifyPassword(password, encodedHash string) (match bool, err error) {
 	// Extract the parameters, salt and derived key from the encoded password
 	// hash.
 	p, salt, hash, err := decodeHash(encodedHash)

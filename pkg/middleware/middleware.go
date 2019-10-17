@@ -1,11 +1,12 @@
-package visitor
+package middleware
 
 import (
 	"context"
 	"net/http"
 	"os"
 
-	"github.com/jadoint/micro/pkg/auth"
+	"github.com/jadoint/micro/pkg/contextkey"
+	"github.com/jadoint/micro/pkg/visitor"
 )
 
 // Middleware adds a Visitor struct to Request
@@ -17,17 +18,8 @@ func Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		v := &Visitor{}
-		shortToken := cookie.Value
-		td, err := auth.ParseToken(shortToken)
-		if err == nil {
-			v = &Visitor{
-				ID:   td.ID,
-				Name: td.Name,
-			}
-		}
-
-		ctx := context.WithValue(r.Context(), GetContextKey(), v)
+		v := visitor.GetVisitorFromCookie(cookie)
+		ctx := context.WithValue(r.Context(), contextkey.GetVisitorKey(), v)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

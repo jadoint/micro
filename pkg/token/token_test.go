@@ -1,11 +1,13 @@
-package auth_test
+package token_test
 
 import (
 	"testing"
 
+	"github.com/jadoint/micro/pkg/visitor"
+
 	"github.com/joho/godotenv"
 
-	"github.com/jadoint/micro/pkg/auth"
+	"github.com/jadoint/micro/pkg/token"
 )
 
 func init() {
@@ -20,14 +22,24 @@ func TestMakeAuthTokenAndParseToken(t *testing.T) {
 		ID:   1,
 		Name: "Username",
 	}
-	shortToken, err := auth.MakeAuthToken(want.ID, want.Name)
+	dataClaim := visitor.GetVisitorTokenDataClaim(want.ID, want.Name)
+	shortToken, err := token.Create(dataClaim)
 	if err != nil {
 		t.Errorf("TestMakeAuthTokenAndParseToken:MakeAuthToken failed with error: %s", err.Error())
 	}
-	got, err := auth.ParseToken(shortToken)
+	claims, err := token.Parse(shortToken)
 	if err != nil {
 		t.Errorf("TestMakeAuthTokenAndParseToken:ParseToken failed with error: %s", err.Error())
 	}
+	got := struct {
+		IAT  int64
+		ID   int64
+		Name string
+	}{}
+	got.IAT = int64(claims["iat"].(float64))
+	claimsData := claims["data"].(map[string]interface{})
+	got.ID = int64(claimsData["id"].(float64))
+	got.Name = claimsData["name"].(string)
 	if got.IAT == 0 {
 		t.Errorf("TestMakeAuthTokenAndParseToken failed, got.ID: %d, want: %s", got.IAT, "> 0")
 	}

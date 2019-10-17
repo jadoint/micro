@@ -7,10 +7,11 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/jadoint/micro/pkg/auth"
 	"github.com/jadoint/micro/pkg/conn"
+	"github.com/jadoint/micro/pkg/cookie"
 	"github.com/jadoint/micro/pkg/errutil"
 	"github.com/jadoint/micro/pkg/logger"
+	"github.com/jadoint/micro/pkg/token"
 	"github.com/jadoint/micro/pkg/user"
 	"github.com/jadoint/micro/pkg/validate"
 	"github.com/jadoint/micro/pkg/visitor"
@@ -65,11 +66,12 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	logger.HandleError(err)
 
 	// JWT
-	tokenString, err := auth.MakeAuthToken(idUser, ur.Username)
+	dataClaim := visitor.GetVisitorTokenDataClaim(idUser, ur.Username)
+	tokenString, err := token.Create(dataClaim)
 	logger.HandleError(err)
 
 	// Cookie
-	auth.AddCookie(w, os.Getenv("COOKIE_SESSION_NAME"), tokenString)
+	cookie.Add(w, os.Getenv("COOKIE_SESSION_NAME"), tokenString)
 
 	// Response
 	newUser := &user.User{ID: idUser, Username: ur.Username}

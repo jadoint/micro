@@ -5,10 +5,12 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/jadoint/micro/pkg/auth"
 	"github.com/jadoint/micro/pkg/conn"
+	"github.com/jadoint/micro/pkg/cookie"
 	"github.com/jadoint/micro/pkg/errutil"
+	"github.com/jadoint/micro/pkg/hash"
 	"github.com/jadoint/micro/pkg/logger"
+	"github.com/jadoint/micro/pkg/token"
 	"github.com/jadoint/micro/pkg/user"
 	"github.com/jadoint/micro/pkg/validate"
 	"github.com/jadoint/micro/pkg/visitor"
@@ -43,7 +45,7 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 		return
 	}
 
-	isMatchingPasswords, err := auth.VerifyPasswordHash(ul.Password, u.Password)
+	isMatchingPasswords, err := hash.VerifyPassword(ul.Password, u.Password)
 	logger.HandleError(err)
 	if !isMatchingPasswords {
 		errutil.Send(w, "Username and password do not match", http.StatusUnauthorized)
@@ -51,11 +53,12 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	}
 
 	// JWT
-	tokenString, err := auth.MakeAuthToken(u.ID, u.Username)
+	dataClaim := visitor.GetVisitorTokenDataClaim(u.ID, u.Username)
+	tokenString, err := token.Create(dataClaim)
 	logger.HandleError(err)
 
 	// Cookie
-	auth.AddCookie(w, os.Getenv("COOKIE_SESSION_NAME"), tokenString)
+	cookie.Add(w, os.Getenv("COOKIE_SESSION_NAME"), tokenString)
 
 	// Response
 	u.Created = ""

@@ -20,7 +20,7 @@ import (
 	"github.com/jadoint/micro/pkg/db"
 	"github.com/jadoint/micro/pkg/env"
 	"github.com/jadoint/micro/pkg/logger"
-	"github.com/jadoint/micro/pkg/visitor"
+	appmiddleware "github.com/jadoint/micro/pkg/middleware"
 )
 
 func main() {
@@ -80,7 +80,7 @@ func main() {
 	lmt := tollbooth.NewLimiter(100, &limiter.ExpirableOptions{DefaultExpirationTTL: time.Hour})
 	lmt.SetIPLookups([]string{"X-Forwarded-For", "RemoteAddr", "X-Real-IP"})
 	r.Use(tollbooth_chi.LimitHandler(lmt))
-	r.Use(visitor.Middleware)
+	r.Use(appmiddleware.Middleware)
 
 	startPath := fmt.Sprintf(`/%s/`, os.Getenv("START_PATH"))
 	r.Mount(startPath+"blog/tag", route.TagRouter(clients))

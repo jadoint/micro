@@ -1,4 +1,4 @@
-package auth
+package token
 
 import (
 	"errors"
@@ -10,21 +10,11 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-// TokenData contains token details
-type TokenData struct {
-	IAT  int64
-	ID   int64
-	Name string
-}
-
-// MakeAuthToken signs a token with given data and returns a token string
-func MakeAuthToken(id int64, name string) (string, error) {
+// Create signs a token with given data and returns a token string
+func Create(dataClaim *jwt.MapClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"iat": time.Now().Unix(),
-		"data": jwt.MapClaims{
-			"id":   id,
-			"name": name,
-		},
+		"iat":  time.Now().Unix(),
+		"data": dataClaim,
 	})
 
 	// Sign and get the complete encoded token as a string using the secret
@@ -40,10 +30,15 @@ func MakeAuthToken(id int64, name string) (string, error) {
 	return tokenString, nil
 }
 
-// ParseToken prepends the algorithm string to a shortened token,
+// Parse prepends the algorithm string to a shortened token,
 // parses and verifies it, and returns the parsed data.
-func ParseToken(shortToken string) (TokenData, error) {
-	var td TokenData
+//
+// Example parsing of returned claims:
+// td.IAT = int64(claims["iat"].(float64))
+// claimsData := claims["data"].(map[string]interface{})
+// td.ID = int64(claimsData["id"].(float64))
+// td.Name = claimsData["name"].(string)
+func Parse(shortToken string) (jwt.MapClaims, error) {
 	// Only storing abbreviated tokens in the cookie to reduce cookie size
 	// so need to prepend algorithm string (HS256) to received token string.
 	tokenString := fmt.Sprintf("%s.%s", os.Getenv("JWT_ALGO"), shortToken)
@@ -52,18 +47,10 @@ func ParseToken(shortToken string) (TokenData, error) {
 		return []byte(os.Getenv("JWT_KEY")), nil
 	})
 	if err != nil {
-		return td, err
+		return claims, err
 	}
 	if !token.Valid {
-		return td, errors.New("Invalid token")
+		return claims, errors.New("Invalid token")
 	}
-
-	// iat
-	td.IAT = int64(claims["iat"].(float64))
-	// data
-	claimsData := claims["data"].(map[string]interface{})
-	td.ID = int64(claimsData["id"].(float64))
-	td.Name = claimsData["name"].(string)
-
-	return td, nil
+	return claims, nil
 }

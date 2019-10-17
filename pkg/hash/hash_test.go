@@ -1,9 +1,9 @@
-package auth_test
+package hash_test
 
 import (
 	"testing"
 
-	"github.com/jadoint/micro/pkg/auth"
+	"github.com/jadoint/micro/pkg/hash"
 	"github.com/joho/godotenv"
 )
 
@@ -13,7 +13,7 @@ func init() {
 
 func TestGenerateHash(t *testing.T) {
 	password := "test123"
-	got, err := auth.GenerateHash(password)
+	got, err := hash.Generate(password)
 	if err != nil {
 		t.Errorf("TestGenerateHash failed with error: %s", err.Error())
 	}
@@ -21,7 +21,7 @@ func TestGenerateHash(t *testing.T) {
 	if got[0:31] != want {
 		t.Errorf("TestGenerateHash failed, got: %s, want: %s", got[0:31], want)
 	}
-	isMatchingPasswords, err := auth.VerifyPasswordHash(password, got)
+	isMatchingPasswords, err := hash.VerifyPassword(password, got)
 	if err != nil {
 		t.Errorf("TestGenerateHash:VerifyPasswordHash failed with error: %s", err.Error())
 	}
@@ -29,7 +29,7 @@ func TestGenerateHash(t *testing.T) {
 		t.Errorf("TestGenerateHash:VerifyPasswordHash failed, got: %t, want: %t", isMatchingPasswords, true)
 	}
 	badPassword := "badpassword"
-	isMatchingPasswords, err = auth.VerifyPasswordHash(badPassword, got)
+	isMatchingPasswords, err = hash.VerifyPassword(badPassword, got)
 	if err != nil {
 		t.Errorf("TestGenerateHash:VerifyPasswordHash failed with error: %s", err.Error())
 	}
@@ -41,7 +41,7 @@ func TestGenerateHash(t *testing.T) {
 func TestVerifyPasswordHash(t *testing.T) {
 	password := "test123"
 	encodedHash := "$argon2id$v=19$m=65536,t=3,p=2$7OOSkacMICQPwQygnEwlEA$FrLtmPBc36lhfjO8QaSB0sLbHusRRsFoKOcWy5tyJsE"
-	isMatchingPasswords, err := auth.VerifyPasswordHash(password, encodedHash)
+	isMatchingPasswords, err := hash.VerifyPassword(password, encodedHash)
 	if err != nil {
 		t.Errorf("TestVerifyPasswordHash failed with error: %s", err.Error())
 	}
@@ -49,7 +49,7 @@ func TestVerifyPasswordHash(t *testing.T) {
 		t.Errorf("TestVerifyPasswordHash [good password] failed, got: %t, want: %t", isMatchingPasswords, true)
 	}
 	badPassword := "badpassword"
-	isMatchingPasswords, err = auth.VerifyPasswordHash(badPassword, encodedHash)
+	isMatchingPasswords, err = hash.VerifyPassword(badPassword, encodedHash)
 	if err != nil {
 		t.Errorf("TestVerifyPasswordHash failed with error: %s", err.Error())
 	}

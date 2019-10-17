@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/jadoint/micro/pkg/auth"
 	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/errutil"
+	"github.com/jadoint/micro/pkg/hash"
 	"github.com/jadoint/micro/pkg/logger"
 	"github.com/jadoint/micro/pkg/user"
 	"github.com/jadoint/micro/pkg/validate"
@@ -37,7 +37,7 @@ func newPassword(w http.ResponseWriter, r *http.Request, clients *conn.Clients) 
 
 	// Authentication
 	u, _ := user.GetUserByUsername(clients, v.Name)
-	isMatchingPasswords, err := auth.VerifyPasswordHash(pc.OldPassword, u.Password)
+	isMatchingPasswords, err := hash.VerifyPassword(pc.OldPassword, u.Password)
 	logger.HandleError(err)
 	if !isMatchingPasswords {
 		errutil.Send(w, "Password is incorrect", http.StatusForbidden)
