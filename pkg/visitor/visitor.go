@@ -30,16 +30,23 @@ func GetVisitorFromCookie(cookie *http.Cookie) *Visitor {
 	v := &Visitor{}
 	shortToken := cookie.Value
 	claims, err := token.Parse(shortToken)
+	if err != nil {
+		return v
+	}
+
 	// iat := int64(claims["iat"].(float64))
 	dataClaim := claims["data"].(map[string]interface{})
-	id := int64(dataClaim["id"].(float64))
-	name := dataClaim["name"].(string)
-	if err == nil {
-		v = &Visitor{
-			ID:   id,
-			Name: name,
-		}
+
+	// ID
+	if idClaim, ok := dataClaim["id"]; ok {
+		v.ID = int64(idClaim.(float64))
 	}
+
+	// Name
+	if name, ok := dataClaim["name"]; ok {
+		v.Name = name.(string)
+	}
+
 	return v
 }
 
