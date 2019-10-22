@@ -4,7 +4,7 @@ Production-ready template for Go + React / Redux microservice applications. Samp
 
 ## Why?
 
-This is meant to be a production-ready template for more complex applications so it may seem needlessly complicated just for a blog. I went the microservices route primarily because in my current monoliths, database schema changes or large updates to a big table (> 50 GB) causes slave lag that affects all other unrelated services. Separating domains into their own databases and codebases was a way to reduce side effects to other services so that a disruption in one does not affect the other (e.g. if the user service goes down, you can still view the blog posts but you just won't see the author).
+This is meant to be a production-ready template for more complex applications so it may seem needlessly complicated just for a blog. I went the microservices route primarily because in my current monoliths, database schema changes and large updates to big tables (> 50 GB) cause slave lag that affects all other unrelated services. Separating domains into their own databases and codebases was a way to reduce side effects to other services so that a disruption in one does not affect the other (e.g. if the user service goes down, you can still view the blog posts but you just won't see the author).
 
 Shared dependencies are located in `/pkg` and are currently a weak point in this project but versioning should help mitigate some of that risk (maybe Go modules when I get around to it).
 
