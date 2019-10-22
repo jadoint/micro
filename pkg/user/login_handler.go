@@ -1,4 +1,4 @@
-package route
+package user
 
 import (
 	"encoding/json"
@@ -11,7 +11,6 @@ import (
 	"github.com/jadoint/micro/pkg/hash"
 	"github.com/jadoint/micro/pkg/logger"
 	"github.com/jadoint/micro/pkg/token"
-	"github.com/jadoint/micro/pkg/user"
 	"github.com/jadoint/micro/pkg/validate"
 	"github.com/jadoint/micro/pkg/visitor"
 )
@@ -27,7 +26,7 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
-	var ul user.Login
+	var ul Login
 	err := d.Decode(&ul)
 	logger.HandleError(err)
 
@@ -39,7 +38,7 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	}
 
 	// Authentication
-	u, _ := user.GetUserByUsername(clients, ul.Username)
+	u, _ := GetUserByUsername(clients, ul.Username)
 	if ul.Username != u.Username {
 		errutil.Send(w, "Username and password do not match", http.StatusUnauthorized)
 		return

@@ -1,9 +1,8 @@
-package route
+package blog
 
 import (
 	"net/http"
 
-	"github.com/jadoint/micro/pkg/blog"
 	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/visitor"
 )
@@ -14,7 +13,7 @@ func isAuthorized(clients *conn.Clients, v *visitor.Visitor, idBlog int64) (bool
 		return false, http.StatusUnauthorized
 	}
 
-	idAuthor, err := blog.GetIDAuthor(clients, idBlog)
+	idAuthor, err := GetIDAuthor(clients, idBlog)
 	if err != nil {
 		return false, http.StatusNotFound
 	}

@@ -1,4 +1,4 @@
-package route
+package user
 
 import (
 	"encoding/json"
@@ -8,7 +8,6 @@ import (
 	"github.com/jadoint/micro/pkg/errutil"
 	"github.com/jadoint/micro/pkg/hash"
 	"github.com/jadoint/micro/pkg/logger"
-	"github.com/jadoint/micro/pkg/user"
 	"github.com/jadoint/micro/pkg/validate"
 	"github.com/jadoint/micro/pkg/visitor"
 )
@@ -24,7 +23,7 @@ func newPassword(w http.ResponseWriter, r *http.Request, clients *conn.Clients) 
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 
-	var pc user.PasswordChange
+	var pc PasswordChange
 	err := d.Decode(&pc)
 	logger.HandleError(err)
 
@@ -36,7 +35,7 @@ func newPassword(w http.ResponseWriter, r *http.Request, clients *conn.Clients) 
 	}
 
 	// Authentication
-	u, _ := user.GetUserByUsername(clients, v.Name)
+	u, _ := GetUserByUsername(clients, v.Name)
 	isMatchingPasswords, err := hash.VerifyPassword(pc.OldPassword, u.Password)
 	logger.HandleError(err)
 	if !isMatchingPasswords {
@@ -45,7 +44,7 @@ func newPassword(w http.ResponseWriter, r *http.Request, clients *conn.Clients) 
 	}
 
 	// Save new password
-	err = user.ChangePassword(clients, v.ID, pc.NewPassword)
+	err = ChangePassword(clients, v.ID, pc.NewPassword)
 
 	// Response
 	res, err := json.Marshal(struct {

@@ -1,4 +1,4 @@
-package route
+package user
 
 import (
 	"encoding/json"
@@ -15,13 +15,47 @@ import (
 	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/errutil"
 	"github.com/jadoint/micro/pkg/logger"
-	"github.com/jadoint/micro/pkg/user"
 	"github.com/jadoint/micro/pkg/validate"
 	"github.com/jadoint/micro/pkg/visitor"
 )
 
-// UserRouter handles user requests
-func UserRouter(clients *conn.Clients) chi.Router {
+// RouteAuth handles signups
+func RouteAuth(clients *conn.Clients) chi.Router {
+	r := chi.NewRouter()
+
+	// Rate limiter: first argument is "x requests / second" per IP
+	lmt := tollbooth.NewLimiter(10, &limiter.ExpirableOptions{DefaultExpirationTTL: time.Hour})
+	lmt.SetIPLookups([]string{"X-Forwarded-For", "RemoteAddr", "X-Real-IP"})
+	r.Use(tollbooth_chi.LimitHandler(lmt))
+
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		v := visitor.GetVisitor(r)
+
+		res, err := json.Marshal(v)
+		logger.HandleError(err)
+
+		w.Write(res)
+	})
+
+	r.Post("/signup", func(w http.ResponseWriter, r *http.Request) {
+		signup(w, r, clients)
+	})
+
+	r.Post("/login", func(w http.ResponseWriter, r *http.Request) {
+		login(w, r, clients)
+	})
+
+	r.Post("/new-password", func(w http.ResponseWriter, r *http.Request) {
+		newPassword(w, r, clients)
+	})
+
+	r.Post("/logout", logout)
+
+	return r
+}
+
+// RouteUser handles user requests
+func RouteUser(clients *conn.Clients) chi.Router {
 	r := chi.NewRouter()
 
 	// Rate limiter: first argument is "x requests / second" per IP
@@ -37,7 +71,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 		}
 		idUser := int64(idUserParam)
 
-		username, err := user.GetUsername(clients, idUser)
+		username, err := GetUsername(clients, idUser)
 		if err != nil {
 			errutil.Send(w, "", http.StatusNotFound)
 			return
@@ -57,7 +91,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 		d := json.NewDecoder(r.Body)
 		d.DisallowUnknownFields()
 
-		var uids user.IDs
+		var uids IDs
 		err := d.Decode(&uids)
 		logger.HandleError(err)
 
@@ -73,7 +107,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 			return
 		}
 
-		names, err := user.GetUsernames(clients, &uids)
+		names, err := GetUsernames(clients, &uids)
 		if err != nil {
 			errutil.Send(w, "", http.StatusNotFound)
 			return
@@ -81,7 +115,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 
 		// Response
 		res, err := json.Marshal(struct {
-			Usernames []*user.Username `json:"usernames"`
+			Usernames []*Username `json:"usernames"`
 		}{names})
 		logger.HandleError(err)
 
@@ -96,7 +130,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 		}
 		idUser := int64(idUserParam)
 
-		a, err := user.GetAbout(clients, idUser)
+		a, err := GetAbout(clients, idUser)
 		if err != nil {
 			errutil.Send(w, "", http.StatusNotFound)
 			return
@@ -134,7 +168,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 		d := json.NewDecoder(r.Body)
 		d.DisallowUnknownFields()
 
-		var a user.About
+		var a About
 		err = d.Decode(&a)
 		logger.HandleError(err)
 		// Strip inputs of all tags
@@ -150,7 +184,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 		}
 
 		// Save
-		err = user.UpdateAbout(clients, v.ID, &a)
+		err = UpdateAbout(clients, v.ID, &a)
 		if err != nil {
 			logger.Panic(err.Error(), "Update About", v.ID)
 		}
@@ -178,7 +212,7 @@ func UserRouter(clients *conn.Clients) chi.Router {
 		}
 
 		// Delete
-		err = user.DeleteAbout(clients, v.ID)
+		err = DeleteAbout(clients, v.ID)
 		if err != nil {
 			logger.Panic(err.Error(), "Delete About", v.ID)
 		}

@@ -15,7 +15,7 @@ import (
 	"github.com/jadoint/micro/pkg/db"
 	"github.com/jadoint/micro/pkg/env"
 	"github.com/jadoint/micro/pkg/logger"
-	"github.com/jadoint/micro/pkg/user/route"
+	"github.com/jadoint/micro/pkg/user"
 	"github.com/jadoint/micro/pkg/visitor"
 )
 
@@ -68,8 +68,8 @@ func main() {
 	r.Use(visitor.Middleware)
 
 	startPath := fmt.Sprintf(`/%s/`, os.Getenv("START_PATH"))
-	r.Mount(startPath+"auth", route.AuthRouter(clients))
-	r.Mount(startPath+"user", route.UserRouter(clients))
+	r.Mount(startPath+"auth", user.RouteAuth(clients))
+	r.Mount(startPath+"user", user.RouteUser(clients))
 
 	srv := &http.Server{
 		Addr:         os.Getenv("LISTEN"),

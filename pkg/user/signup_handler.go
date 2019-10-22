@@ -1,4 +1,4 @@
-package route
+package user
 
 import (
 	"encoding/json"
@@ -12,7 +12,6 @@ import (
 	"github.com/jadoint/micro/pkg/errutil"
 	"github.com/jadoint/micro/pkg/logger"
 	"github.com/jadoint/micro/pkg/token"
-	"github.com/jadoint/micro/pkg/user"
 	"github.com/jadoint/micro/pkg/validate"
 	"github.com/jadoint/micro/pkg/visitor"
 )
@@ -34,7 +33,7 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	// Marshalling
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
-	var ur user.Registration
+	var ur Registration
 	err = d.Decode(&ur)
 	logger.HandleError(err)
 
@@ -55,14 +54,14 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	}
 
 	// Check if username is unique
-	u, _ := user.GetUserByUsername(clients, ur.Username)
+	u, _ := GetUserByUsername(clients, ur.Username)
 	if ur.Username == u.Username {
 		errutil.Send(w, "Username already exists", http.StatusForbidden)
 		return
 	}
 
 	// Success: Add user
-	idUser, err := user.AddUser(clients, &ur, rr)
+	idUser, err := AddUser(clients, &ur, rr)
 	logger.HandleError(err)
 
 	// JWT
@@ -74,14 +73,14 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	cookie.Add(w, os.Getenv("COOKIE_SESSION_NAME"), tokenString)
 
 	// Response
-	newUser := &user.User{ID: idUser, Username: ur.Username}
+	newUser := &User{ID: idUser, Username: ur.Username}
 	res, err := json.Marshal(newUser)
 	logger.HandleError(err)
 
 	w.Write(res)
 }
 
-func validateRecaptcha(token string) *user.RecaptchaResponse {
+func validateRecaptcha(token string) *RecaptchaResponse {
 	captchaFields := url.Values{
 		"secret":   {os.Getenv("RECAPTCHA_KEY")},
 		"response": {token},
@@ -95,7 +94,7 @@ func validateRecaptcha(token string) *user.RecaptchaResponse {
 	d := json.NewDecoder(resp.Body)
 	d.DisallowUnknownFields()
 
-	var rr user.RecaptchaResponse
+	var rr RecaptchaResponse
 	err = d.Decode(&rr)
 	logger.HandleError(err)
 

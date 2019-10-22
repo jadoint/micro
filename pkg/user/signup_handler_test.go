@@ -1,4 +1,4 @@
-package route
+package user
 
 import (
 	"bytes"
@@ -12,7 +12,6 @@ import (
 
 	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/db"
-	"github.com/jadoint/micro/pkg/user"
 	"github.com/jadoint/micro/pkg/validate"
 )
 
@@ -72,7 +71,7 @@ func TestSignupSuccess(t *testing.T) {
 	defer clients.DB.Master.Close()
 	defer clients.DB.Read.Close()
 
-	dbUser, err := user.GetUser(clients, newUser.ID)
+	dbUser, err := GetUser(clients, newUser.ID)
 	if err != nil {
 		t.Errorf("TestSignupSuccess failed with error: %s", err.Error())
 	}

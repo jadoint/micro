@@ -1,14 +1,14 @@
-package route
+package blog
 
 import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi"
 
-	"github.com/jadoint/micro/pkg/blog"
 	"github.com/jadoint/micro/pkg/clean"
 	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/errutil"
@@ -20,8 +20,8 @@ import (
 	"github.com/jadoint/micro/pkg/words"
 )
 
-// BlogRouter handles all requests to /blog/
-func BlogRouter(clients *conn.Clients) chi.Router {
+// RouteBlog handles all requests to /blog/
+func RouteBlog(clients *conn.Clients) chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/{idBlog:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +34,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 
 		v := visitor.GetVisitor(r)
 
-		b, err := blog.GetPostInit(clients, idBlog)
+		b, err := GetPostInit(clients, idBlog)
 		if err != nil {
 			http.Error(w, "", http.StatusNotFound)
 			return
@@ -52,7 +52,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		}
 
 		res, err := json.Marshal(struct {
-			*blog.Blog
+			*Blog
 			IDVisitor int64 `json:"idVisitor,omitempty"`
 		}{
 			b,
@@ -73,7 +73,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		}
 		idBlog := int64(idBlogParam)
 
-		b, err := blog.GetPost(clients, idBlog)
+		b, err := GetPost(clients, idBlog)
 		if err != nil {
 			http.Error(w, "", http.StatusNotFound)
 			return
@@ -86,7 +86,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		b.Modified = t.Format("January 02, 2006")
 		b.ModifiedDatetime = t.Format("20060102150405")
 
-		res, err := json.Marshal(struct{ *blog.Blog }{b})
+		res, err := json.Marshal(struct{ *Blog }{b})
 		if err != nil {
 			logger.Panic(err.Error(), "Get Blog ID", idBlog)
 		}
@@ -105,7 +105,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		d := json.NewDecoder(r.Body)
 		d.DisallowUnknownFields()
 
-		var b blog.Blog
+		var b Blog
 		err := d.Decode(&b)
 		logger.HandleError(err)
 		b.IDAuthor = v.ID
@@ -129,7 +129,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		}
 
 		// Save
-		idBlog, err := blog.Add(clients, &b)
+		idBlog, err := Add(clients, &b)
 		if err != nil {
 			logger.Panic(err.Error(), "Add Blog ID", idBlog)
 		}
@@ -160,7 +160,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		d := json.NewDecoder(r.Body)
 		d.DisallowUnknownFields()
 
-		var b blog.Blog
+		var b Blog
 		err = d.Decode(&b)
 		logger.HandleError(err)
 		b.ID = idBlog
@@ -186,7 +186,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		}
 
 		// Save
-		err = blog.Update(clients, &b)
+		err = Update(clients, &b)
 		if err != nil {
 			logger.Panic(err.Error(), "Update Blog ID", idBlog)
 		}
@@ -214,7 +214,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		}
 
 		// Delete
-		err = blog.Delete(clients, idBlog)
+		err = Delete(clients, idBlog)
 		if err != nil {
 			logger.Panic(err.Error(), "Delete Blog ID", idBlog)
 		}
@@ -234,7 +234,7 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		}
 		idBlog := int64(idBlogParam)
 
-		views, err := blog.IncrViews(clients, idBlog)
+		views, err := IncrViews(clients, idBlog)
 		if err != nil {
 			http.Error(w, "", http.StatusNotFound)
 			return
@@ -259,11 +259,11 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 			return
 		}
 
-		var blogs []*blog.Blog
+		var blogs []*Blog
 		tagParam := r.URL.Query().Get("tag")
 		if tagParam != "" {
 			// Latest blog listings by tag
-			var t blog.Tag
+			var t Tag
 			t.Tag = tagParam
 
 			// Validation
@@ -273,14 +273,14 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 				return
 			}
 
-			blogs, err = blog.GetLatestByTag(clients, t.Tag, pageNum, 10)
+			blogs, err = GetLatestByTag(clients, t.Tag, pageNum, 10)
 			if err != nil {
 				http.Error(w, "", http.StatusNotFound)
 				return
 			}
 		} else {
 			// Latest blog listings
-			blogs, err = blog.GetLatest(clients, pageNum, 10)
+			blogs, err = GetLatest(clients, pageNum, 10)
 		}
 
 		if err != nil {
@@ -289,9 +289,9 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 		}
 
 		res, err := json.Marshal(struct {
-			Listings  []*blog.Blog `json:"listings"`
-			PageNum   int          `json:"pageNum,omitempty"`
-			IDVisitor int64        `json:"idVisitor,omitempty"`
+			Listings  []*Blog `json:"listings"`
+			PageNum   int     `json:"pageNum,omitempty"`
+			IDVisitor int64   `json:"idVisitor,omitempty"`
 		}{
 			Listings:  blogs,
 			PageNum:   pageNum,
@@ -314,15 +314,15 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 
 		v := visitor.GetVisitor(r)
 
-		blogs, err := blog.GetRecentAuthorBlogs(clients, idAuthor)
+		blogs, err := GetRecentAuthorBlogs(clients, idAuthor)
 		if err != nil {
 			http.Error(w, "", http.StatusNotFound)
 			return
 		}
 
 		res, err := json.Marshal(struct {
-			Listings  []*blog.Blog `json:"listings"`
-			IDVisitor int64        `json:"idVisitor,omitempty"`
+			Listings  []*Blog `json:"listings"`
+			IDVisitor int64   `json:"idVisitor,omitempty"`
 		}{
 			Listings:  blogs,
 			IDVisitor: v.ID,
@@ -331,6 +331,119 @@ func BlogRouter(clients *conn.Clients) chi.Router {
 			logger.Panic(err.Error(), "Recent blogs by author ID", idAuthor)
 		}
 
+		w.Write(res)
+	})
+
+	return r
+}
+
+// RouteTag handles all requests to /blog/tag
+func RouteTag(clients *conn.Clients) chi.Router {
+	r := chi.NewRouter()
+
+	r.Get("/frequent", func(w http.ResponseWriter, r *http.Request) {
+		tags, _ := GetFrequentTags(clients)
+
+		res, err := json.Marshal(struct {
+			FrequentTags []*string `json:"frequentTags,omitempty"`
+		}{tags})
+		logger.HandleError(err)
+		w.Write(res)
+	})
+
+	r.Get("/{idBlog:[0-9]+}/{jsonName:[a-z0-9_.]+}", func(w http.ResponseWriter, r *http.Request) {
+		idBlogParam, err := strconv.Atoi(chi.URLParam(r, "idBlog"))
+		if err != nil {
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
+		idBlog := int64(idBlogParam)
+
+		tagCsv, _ := GetTagsCSV(clients, idBlog)
+		var tags []string
+		if tagCsv != "" {
+			tags = strings.Split(tagCsv, ",")
+		}
+
+		res, err := json.Marshal(struct {
+			Tags []string `json:"tags,omitempty"`
+		}{tags})
+		logger.HandleError(err)
+		w.Write(res)
+	})
+
+	r.Post("/{idBlog:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
+		idBlogParam, err := strconv.Atoi(chi.URLParam(r, "idBlog"))
+		if err != nil {
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
+		idBlog := int64(idBlogParam)
+
+		// Authorization
+		v := visitor.GetVisitor(r)
+		isAuthorized, status := isAuthorized(clients, v, idBlog)
+		if !isAuthorized {
+			http.Error(w, "", status)
+			return
+		}
+
+		// Unmarshalling
+		d := json.NewDecoder(r.Body)
+		d.DisallowUnknownFields()
+
+		var t Tag
+		err = d.Decode(&t)
+		logger.HandleError(err)
+
+		// Validation
+		err = t.Validate()
+		if err != nil {
+			errutil.Send(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Save
+		idTag, err := AddTag(clients, idBlog, &t)
+		if err != nil {
+			errutil.Send(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		res, err := json.Marshal(struct {
+			ID int64 `json:"idTag"`
+		}{idTag})
+		w.Write(res)
+	})
+
+	r.Delete("/{idBlog:[0-9]+}/{tag}", func(w http.ResponseWriter, r *http.Request) {
+		idBlogParam, err := strconv.Atoi(chi.URLParam(r, "idBlog"))
+		if err != nil {
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
+		idBlog := int64(idBlogParam)
+		tag := chi.URLParam(r, "tag")
+
+		// Authorization
+		v := visitor.GetVisitor(r)
+		isAuthorized, status := isAuthorized(clients, v, idBlog)
+		if !isAuthorized {
+			http.Error(w, "", status)
+			return
+		}
+
+		// Delete
+		err = DeleteTag(clients, idBlog, tag)
+		if err != nil {
+			errutil.Send(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		res, err := json.Marshal(struct {
+			ID  int64  `json:"idPost"`
+			Tag string `json:"tag"`
+		}{idBlog, tag})
 		w.Write(res)
 	})
 

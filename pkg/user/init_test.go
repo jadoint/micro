@@ -1,4 +1,4 @@
-package route
+package user
 
 import "github.com/joho/godotenv"
 

@@ -1,4 +1,4 @@
-package route
+package blog
 
 import "github.com/joho/godotenv"
 

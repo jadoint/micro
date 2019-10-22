@@ -1,4 +1,4 @@
-package route
+package blog
 
 import (
 	"bytes"
@@ -10,7 +10,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jadoint/micro/pkg/blog"
 	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/db"
 	"github.com/jadoint/micro/pkg/fmtdate"
@@ -33,13 +32,13 @@ func TestGetBlog(t *testing.T) {
 	d := json.NewDecoder(resp.Body)
 	d.DisallowUnknownFields()
 
-	var got blog.Blog
+	var got Blog
 	err = d.Decode(&got)
 	if err != nil {
 		t.Errorf("TestGetBlog failed with error: %s", err.Error())
 	}
 
-	want := &blog.Blog{
+	want := &Blog{
 		ID:        1,
 		IDAuthor:  1,
 		Title:     "Lorem Ipsum Dolor 1",
@@ -123,7 +122,7 @@ func TestPostBlogSuccess(t *testing.T) {
 		t.Skip("Set LISTEN and start server test server to run this test")
 	}
 	url := fmt.Sprintf("http://%s/%s/blog", listen, os.Getenv("START_PATH"))
-	test := &blog.Blog{
+	test := &Blog{
 		Title:      "<h1>Test Title</h1>",
 		Post:       "Test Post<script>alert('test')</script>",
 		IsUnlisted: false,
@@ -183,7 +182,7 @@ func TestPostBlogSuccess(t *testing.T) {
 	defer clients.DB.Master.Close()
 	defer clients.DB.Read.Close()
 
-	dbBlog, err := blog.Get(clients, newBlog.ID)
+	dbBlog, err := Get(clients, newBlog.ID)
 	if err != nil {
 		t.Errorf("TestPostBlogSuccess failed with error: %s", err.Error())
 	}
@@ -192,7 +191,7 @@ func TestPostBlogSuccess(t *testing.T) {
 		t.Errorf("TestPostBlogSuccess failed, got: %d, want %d", dbBlog.ID, newBlog.ID)
 	}
 
-	want := &blog.Blog{
+	want := &Blog{
 		Title:      "Test Title",
 		Post:       "Test Post",
 		IsUnlisted: false,
@@ -207,7 +206,7 @@ func TestPostBlogSuccess(t *testing.T) {
 	}
 
 	// DB cleanup
-	err = blog.Delete(clients, newBlog.ID)
+	err = Delete(clients, newBlog.ID)
 	if err != nil {
 		t.Errorf("TestPostBlogSuccess:Cleanup failed with error: %s", err.Error())
 	}
@@ -219,7 +218,7 @@ func TestUpdateBlogSuccess(t *testing.T) {
 		t.Skip("Set LISTEN and start server test server to run this test")
 	}
 	url := fmt.Sprintf("http://%s/%s/blog/6", listen, os.Getenv("START_PATH"))
-	test := &blog.Blog{
+	test := &Blog{
 		ID:         6,
 		Title:      "<h1>Updated</h1>",
 		Post:       "New Update<script>alert('test')</script>",
@@ -266,7 +265,7 @@ func TestUpdateBlogSuccess(t *testing.T) {
 		t.Errorf("TestUpdateBlogSuccess failed with error: %s", err.Error())
 	}
 
-	want := &blog.Blog{
+	want := &Blog{
 		ID:         6,
 		Title:      "Updated",
 		Post:       "New Update",
@@ -292,7 +291,7 @@ func TestUpdateBlogSuccess(t *testing.T) {
 	defer clients.DB.Master.Close()
 	defer clients.DB.Read.Close()
 
-	got, err := blog.Get(clients, b.ID)
+	got, err := Get(clients, b.ID)
 	if err != nil {
 		t.Errorf("TestUpdateBlogSuccess failed with error: %s", err.Error())
 	}
@@ -317,7 +316,7 @@ func TestUpdateBlogSuccess(t *testing.T) {
 	}
 
 	// DB cleanup - revert all fields to original except for `modified`
-	original := &blog.Blog{
+	original := &Blog{
 		ID:         6,
 		Title:      "Test Update",
 		Post:       "<p>Lorem Ipsum Dolor Sit Amet</p>",
@@ -326,7 +325,7 @@ func TestUpdateBlogSuccess(t *testing.T) {
 		IsDraft:    false,
 		Modified:   want.Modified,
 	}
-	err = blog.Update(clients, original)
+	err = Update(clients, original)
 	if err != nil {
 		t.Errorf("TestUpdateBlogSuccess:Cleanup failed with error: %s", err.Error())
 	}
@@ -349,7 +348,7 @@ func TestDeleteBlogSuccess(t *testing.T) {
 	defer clients.DB.Master.Close()
 	defer clients.DB.Read.Close()
 
-	b := &blog.Blog{
+	b := &Blog{
 		IDAuthor:   1,
 		Title:      "Test Delete",
 		Post:       "Delete",
@@ -357,13 +356,13 @@ func TestDeleteBlogSuccess(t *testing.T) {
 		IsUnlisted: false,
 		IsDraft:    false,
 	}
-	idBlog, err := blog.Add(clients, b)
+	idBlog, err := Add(clients, b)
 	if err != nil {
 		t.Errorf("TestDeleteBlogSuccess:Setup failed with error: %s", err.Error())
 	}
 
 	// Check inserted blog
-	dbBlog, err := blog.Get(clients, idBlog)
+	dbBlog, err := Get(clients, idBlog)
 	if err != nil {
 		t.Errorf("TestDeleteBlogSuccess failed with error: %s", err.Error())
 	}
@@ -415,7 +414,7 @@ func TestDeleteBlogSuccess(t *testing.T) {
 	}
 
 	// Verify the delete in the database
-	_, err = blog.Get(clients, idBlog)
+	_, err = Get(clients, idBlog)
 	if err == nil {
 		t.Errorf("TestDeleteBlogSuccess failed (deleted entry found) with error: %s", err.Error())
 	}
@@ -438,8 +437,8 @@ func TestGetLatest(t *testing.T) {
 	d.DisallowUnknownFields()
 
 	got := struct {
-		Blogs   []*blog.Blog `json:"listings"`
-		PageNum int          `json:"pageNum"`
+		Blogs   []*Blog `json:"listings"`
+		PageNum int     `json:"pageNum"`
 	}{}
 	err = d.Decode(&got)
 	if err != nil {
@@ -475,7 +474,7 @@ func TestGetRecent(t *testing.T) {
 	d.DisallowUnknownFields()
 
 	got := struct {
-		Blogs []*blog.Blog `json:"listings"`
+		Blogs []*Blog `json:"listings"`
 	}{}
 	err = d.Decode(&got)
 	if err != nil {

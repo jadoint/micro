@@ -15,7 +15,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/go-redis/redis"
 
-	"github.com/jadoint/micro/pkg/blog/route"
+	"github.com/jadoint/micro/pkg/blog"
 	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/db"
 	"github.com/jadoint/micro/pkg/env"
@@ -83,8 +83,8 @@ func main() {
 	r.Use(visitor.Middleware)
 
 	startPath := fmt.Sprintf(`/%s/`, os.Getenv("START_PATH"))
-	r.Mount(startPath+"blog/tag", route.TagRouter(clients))
-	r.Mount(startPath+"blog", route.BlogRouter(clients))
+	r.Mount(startPath+"blog/tag", blog.RouteTag(clients))
+	r.Mount(startPath+"blog", blog.RouteBlog(clients))
 
 	srv := &http.Server{
 		Addr:         os.Getenv("LISTEN"),
