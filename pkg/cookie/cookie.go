@@ -36,3 +36,12 @@ func Remove(w http.ResponseWriter, name string) {
 	}
 	http.SetCookie(w, &cookie)
 }
+
+// HasCookie determines if a visitor has a specific cookie
+func HasCookie(r *http.Request, name string) bool {
+	_, err := r.Cookie(name)
+	if err != nil {
+		return false
+	}
+	return true
+}
