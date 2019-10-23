@@ -11,7 +11,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/jadoint/micro/pkg/clean"
-	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/logger"
 	"github.com/jadoint/micro/pkg/paginate"
 )
@@ -32,9 +31,9 @@ type Blog struct {
 }
 
 // GetLatest gets latest blogs posted
-func GetLatest(clients *conn.Clients, pageNum int, pageSize int) ([]*Blog, error) {
+func (env *Env) GetLatest(pageNum int, pageSize int) ([]*Blog, error) {
 	offset := paginate.GetOffset(pageNum, pageSize)
-	db := clients.DB.Read
+	db := env.clients.DB.Read
 	rows, err := db.Query(`
 		SELECT b.id_blog, b.id_author, b.title, LEFT(b.post, 300) AS post,
 			b.word_count, b.created, b.modified, bt.tags
@@ -81,9 +80,9 @@ func GetLatest(clients *conn.Clients, pageNum int, pageSize int) ([]*Blog, error
 }
 
 // GetLatestByTag gets latest blogs posted by tag
-func GetLatestByTag(clients *conn.Clients, tag string, pageNum int, pageSize int) ([]*Blog, error) {
+func (env *Env) GetLatestByTag(tag string, pageNum int, pageSize int) ([]*Blog, error) {
 	offset := paginate.GetOffset(pageNum, pageSize)
-	db := clients.DB.Read
+	db := env.clients.DB.Read
 	rows, err := db.Query(`
 		SELECT b.id_blog, b.id_author, b.title, LEFT(b.post, 300) AS post,
 			b.word_count, b.created, b.modified, bts.tags
@@ -132,8 +131,8 @@ func GetLatestByTag(clients *conn.Clients, tag string, pageNum int, pageSize int
 }
 
 // GetRecentAuthorBlogs gets all recent blogs by an author
-func GetRecentAuthorBlogs(clients *conn.Clients, idAuthor int64) ([]*Blog, error) {
-	db := clients.DB.Read
+func (env *Env) GetRecentAuthorBlogs(idAuthor int64) ([]*Blog, error) {
+	db := env.clients.DB.Read
 	rows, err := db.Query(`
 		SELECT b.id_blog, b.title
 		FROM blog AS b
@@ -168,8 +167,8 @@ func GetRecentAuthorBlogs(clients *conn.Clients, idAuthor int64) ([]*Blog, error
 }
 
 // Get gets single blog post and its settings
-func Get(clients *conn.Clients, idBlog int64) (*Blog, error) {
-	db := clients.DB.Read
+func (env *Env) Get(idBlog int64) (*Blog, error) {
+	db := env.clients.DB.Read
 	var b Blog
 	err := db.QueryRow(`
 		SELECT b.id_blog, b.id_author, b.title, b.post,
@@ -193,8 +192,8 @@ func Get(clients *conn.Clients, idBlog int64) (*Blog, error) {
 
 // GetPostInit gets blog settings and credentials used
 // for retrieving details from GetPost.
-func GetPostInit(clients *conn.Clients, idBlog int64) (*Blog, error) {
-	db := clients.DB.Read
+func (env *Env) GetPostInit(idBlog int64) (*Blog, error) {
+	db := env.clients.DB.Read
 	var b Blog
 	err := db.QueryRow(`
 		SELECT b.id_blog, b.id_author, b.modified,
@@ -216,8 +215,8 @@ func GetPostInit(clients *conn.Clients, idBlog int64) (*Blog, error) {
 }
 
 // GetPost gets single blog post
-func GetPost(clients *conn.Clients, idBlog int64) (*Blog, error) {
-	db := clients.DB.Read
+func (env *Env) GetPost(idBlog int64) (*Blog, error) {
+	db := env.clients.DB.Read
 	var b Blog
 	err := db.QueryRow(`
 		SELECT id_blog, title, post, word_count, created, modified
@@ -237,8 +236,8 @@ func GetPost(clients *conn.Clients, idBlog int64) (*Blog, error) {
 }
 
 // GetIDAuthor gets author ID of blog
-func GetIDAuthor(clients *conn.Clients, idBlog int64) (int64, error) {
-	db := clients.DB.Read
+func (env *Env) GetIDAuthor(idBlog int64) (int64, error) {
+	db := env.clients.DB.Read
 	var idAuthor int64
 	err := db.QueryRow(`
 		SELECT id_author
@@ -257,9 +256,9 @@ func GetIDAuthor(clients *conn.Clients, idBlog int64) (int64, error) {
 }
 
 // Add creates a new blog post
-func Add(clients *conn.Clients, b *Blog) (int64, error) {
+func (env *Env) Add(b *Blog) (int64, error) {
 	// Blog
-	res, err := clients.DB.Exec(`
+	res, err := env.clients.DB.Exec(`
 		INSERT INTO blog(id_author, title, post, word_count)
 		VALUES(?, ?, ?, ?)`,
 		b.IDAuthor, b.Title, b.Post, b.WordCount)
@@ -273,14 +272,14 @@ func Add(clients *conn.Clients, b *Blog) (int64, error) {
 	b.ID = idBlog
 
 	// Settings
-	go UpdateSettings(clients, b)
+	go env.UpdateSettings(b)
 
 	return idBlog, nil
 }
 
 // Update update blog post
-func Update(clients *conn.Clients, b *Blog) error {
-	_, err := clients.DB.Exec(`
+func (env *Env) Update(b *Blog) error {
+	_, err := env.clients.DB.Exec(`
 		UPDATE blog
 		SET title = ?, post = ?, word_count = ?, modified = ?
 		WHERE id_blog = ?
@@ -291,14 +290,14 @@ func Update(clients *conn.Clients, b *Blog) error {
 	}
 
 	// Settings
-	go UpdateSettings(clients, b)
+	go env.UpdateSettings(b)
 
 	return nil
 }
 
 // UpdateSettings saves blog settings
-func UpdateSettings(clients *conn.Clients, b *Blog) {
-	_, err := clients.DB.Exec(`
+func (env *Env) UpdateSettings(b *Blog) {
+	_, err := env.clients.DB.Exec(`
 		UPDATE blog_settings
 		SET is_unlisted = ?, is_draft = ?
 		WHERE id_blog = ?
@@ -310,8 +309,8 @@ func UpdateSettings(clients *conn.Clients, b *Blog) {
 }
 
 // Delete delete blog post
-func Delete(clients *conn.Clients, idBlog int64) error {
-	_, err := clients.DB.Exec(`
+func (env *Env) Delete(idBlog int64) error {
+	_, err := env.clients.DB.Exec(`
 		DELETE FROM blog
 		WHERE id_blog = ?
 		LIMIT 1`,
@@ -323,9 +322,9 @@ func Delete(clients *conn.Clients, idBlog int64) error {
 }
 
 // GetViews gets blog view count
-func GetViews(clients *conn.Clients, idBlog int64) (int64, error) {
+func (env *Env) GetViews(idBlog int64) (int64, error) {
 	var views int64
-	dbRead := clients.DB.Read
+	dbRead := env.clients.DB.Read
 	err := dbRead.QueryRow(`
 			SELECT views
 			FROM blog_views
@@ -343,12 +342,12 @@ func GetViews(clients *conn.Clients, idBlog int64) (int64, error) {
 }
 
 // IncrViews increments blog views
-func IncrViews(clients *conn.Clients, idBlog int64) (int64, error) {
+func (env *Env) IncrViews(idBlog int64) (int64, error) {
 	bvKey := fmt.Sprintf("blog:views:%d", idBlog)
-	res := clients.Cache.Get(bvKey)
+	res := env.clients.Cache.Get(bvKey)
 	if res.Err() == redis.Nil {
 		// Not found in cache so check the database
-		views, err := GetViews(clients, idBlog)
+		views, err := env.GetViews(idBlog)
 		if err != nil {
 			return 0, err
 		}
@@ -358,7 +357,7 @@ func IncrViews(clients *conn.Clients, idBlog int64) (int64, error) {
 		if views == 0 {
 			views = 1
 		}
-		clients.Cache.IncrBy(bvKey, views)
+		env.clients.Cache.IncrBy(bvKey, views)
 
 		return views, nil
 	}
@@ -371,7 +370,7 @@ func IncrViews(clients *conn.Clients, idBlog int64) (int64, error) {
 	// Reduce database writes by
 	// limiting view count updates
 	if views%10 == 0 {
-		_, err := clients.DB.Exec(`
+		_, err := env.clients.DB.Exec(`
 			UPDATE blog_views
 			SET views = views + 10
 			WHERE id_blog = ?
@@ -381,7 +380,7 @@ func IncrViews(clients *conn.Clients, idBlog int64) (int64, error) {
 		}
 	}
 
-	clients.Cache.Incr(bvKey)
+	env.clients.Cache.Incr(bvKey)
 
 	return views + 1, nil
 }

@@ -7,7 +7,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/cookie"
 	"github.com/jadoint/micro/pkg/errutil"
 	"github.com/jadoint/micro/pkg/logger"
@@ -16,7 +15,7 @@ import (
 	"github.com/jadoint/micro/pkg/visitor"
 )
 
-func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
+func (env *Env) signup(w http.ResponseWriter, r *http.Request) {
 	v := visitor.GetVisitor(r)
 	if v.ID > 0 {
 		errutil.Send(w, "Already logged in", http.StatusForbidden)
@@ -54,14 +53,14 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	}
 
 	// Check if username is unique
-	u, _ := GetUserByUsername(clients, ur.Username)
+	u, _ := env.GetUserByUsername(ur.Username)
 	if ur.Username == u.Username {
 		errutil.Send(w, "Username already exists", http.StatusForbidden)
 		return
 	}
 
 	// Success: Add user
-	idUser, err := AddUser(clients, &ur, rr)
+	idUser, err := env.AddUser(&ur, rr)
 	logger.HandleError(err)
 
 	// JWT

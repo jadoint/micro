@@ -20,9 +20,15 @@ import (
 	"github.com/jadoint/micro/pkg/words"
 )
 
+// Env connection environment
+type Env struct {
+	clients *conn.Clients
+}
+
 // RouteBlog handles all requests to /blog/
 func RouteBlog(clients *conn.Clients) chi.Router {
 	r := chi.NewRouter()
+	env := &Env{clients: clients}
 
 	r.Get("/{idBlog:[0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 		idBlogParam, err := strconv.Atoi(chi.URLParam(r, "idBlog"))
@@ -34,7 +40,7 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 
 		v := visitor.GetVisitor(r)
 
-		b, err := GetPostInit(clients, idBlog)
+		b, err := env.GetPostInit(idBlog)
 		if err != nil {
 			http.Error(w, "", http.StatusNotFound)
 			return
@@ -73,7 +79,7 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 		}
 		idBlog := int64(idBlogParam)
 
-		b, err := GetPost(clients, idBlog)
+		b, err := env.GetPost(idBlog)
 		if err != nil {
 			http.Error(w, "", http.StatusNotFound)
 			return
@@ -129,7 +135,7 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 		}
 
 		// Save
-		idBlog, err := Add(clients, &b)
+		idBlog, err := env.Add(&b)
 		if err != nil {
 			logger.Panic(err.Error(), "Add Blog ID", idBlog)
 		}
@@ -150,7 +156,7 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 
 		// Authorization
 		v := visitor.GetVisitor(r)
-		isAuthorized, status := isAuthorized(clients, v, idBlog)
+		isAuthorized, status := env.isAuthorized(v, idBlog)
 		if !isAuthorized {
 			http.Error(w, "", status)
 			return
@@ -186,7 +192,7 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 		}
 
 		// Save
-		err = Update(clients, &b)
+		err = env.Update(&b)
 		if err != nil {
 			logger.Panic(err.Error(), "Update Blog ID", idBlog)
 		}
@@ -207,14 +213,14 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 
 		// Authorization
 		v := visitor.GetVisitor(r)
-		isAuthorized, status := isAuthorized(clients, v, idBlog)
+		isAuthorized, status := env.isAuthorized(v, idBlog)
 		if !isAuthorized {
 			http.Error(w, "", status)
 			return
 		}
 
 		// Delete
-		err = Delete(clients, idBlog)
+		err = env.Delete(idBlog)
 		if err != nil {
 			logger.Panic(err.Error(), "Delete Blog ID", idBlog)
 		}
@@ -234,7 +240,7 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 		}
 		idBlog := int64(idBlogParam)
 
-		views, err := IncrViews(clients, idBlog)
+		views, err := env.IncrViews(idBlog)
 		if err != nil {
 			http.Error(w, "", http.StatusNotFound)
 			return
@@ -273,14 +279,14 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 				return
 			}
 
-			blogs, err = GetLatestByTag(clients, t.Tag, pageNum, 10)
+			blogs, err = env.GetLatestByTag(t.Tag, pageNum, 10)
 			if err != nil {
 				http.Error(w, "", http.StatusNotFound)
 				return
 			}
 		} else {
 			// Latest blog listings
-			blogs, err = GetLatest(clients, pageNum, 10)
+			blogs, err = env.GetLatest(pageNum, 10)
 		}
 
 		if err != nil {
@@ -314,7 +320,7 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 
 		v := visitor.GetVisitor(r)
 
-		blogs, err := GetRecentAuthorBlogs(clients, idAuthor)
+		blogs, err := env.GetRecentAuthorBlogs(idAuthor)
 		if err != nil {
 			http.Error(w, "", http.StatusNotFound)
 			return
@@ -340,9 +346,10 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 // RouteTag handles all requests to /blog/tag
 func RouteTag(clients *conn.Clients) chi.Router {
 	r := chi.NewRouter()
+	env := &Env{clients: clients}
 
 	r.Get("/frequent", func(w http.ResponseWriter, r *http.Request) {
-		tags, _ := GetFrequentTags(clients)
+		tags, _ := env.GetFrequentTags()
 
 		res, err := json.Marshal(struct {
 			FrequentTags []*string `json:"frequentTags,omitempty"`
@@ -359,7 +366,7 @@ func RouteTag(clients *conn.Clients) chi.Router {
 		}
 		idBlog := int64(idBlogParam)
 
-		tagCsv, _ := GetTagsCSV(clients, idBlog)
+		tagCsv, _ := env.GetTagsCSV(idBlog)
 		var tags []string
 		if tagCsv != "" {
 			tags = strings.Split(tagCsv, ",")
@@ -382,7 +389,7 @@ func RouteTag(clients *conn.Clients) chi.Router {
 
 		// Authorization
 		v := visitor.GetVisitor(r)
-		isAuthorized, status := isAuthorized(clients, v, idBlog)
+		isAuthorized, status := env.isAuthorized(v, idBlog)
 		if !isAuthorized {
 			http.Error(w, "", status)
 			return
@@ -404,7 +411,7 @@ func RouteTag(clients *conn.Clients) chi.Router {
 		}
 
 		// Save
-		idTag, err := AddTag(clients, idBlog, &t)
+		idTag, err := env.AddTag(idBlog, &t)
 		if err != nil {
 			errutil.Send(w, err.Error(), http.StatusBadRequest)
 			return
@@ -427,14 +434,14 @@ func RouteTag(clients *conn.Clients) chi.Router {
 
 		// Authorization
 		v := visitor.GetVisitor(r)
-		isAuthorized, status := isAuthorized(clients, v, idBlog)
+		isAuthorized, status := env.isAuthorized(v, idBlog)
 		if !isAuthorized {
 			http.Error(w, "", status)
 			return
 		}
 
 		// Delete
-		err = DeleteTag(clients, idBlog, tag)
+		err = env.DeleteTag(idBlog, tag)
 		if err != nil {
 			errutil.Send(w, err.Error(), http.StatusInternalServerError)
 			return

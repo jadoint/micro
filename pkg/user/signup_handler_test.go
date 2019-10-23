@@ -70,8 +70,9 @@ func TestSignupSuccess(t *testing.T) {
 	clients := &conn.Clients{DB: dbClient}
 	defer clients.DB.Master.Close()
 	defer clients.DB.Read.Close()
+	env := &Env{clients: clients}
 
-	dbUser, err := GetUser(clients, newUser.ID)
+	dbUser, err := env.GetUser(newUser.ID)
 	if err != nil {
 		t.Errorf("TestSignupSuccess failed with error: %s", err.Error())
 	}
