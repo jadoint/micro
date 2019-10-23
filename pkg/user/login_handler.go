@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/cookie"
 	"github.com/jadoint/micro/pkg/errutil"
 	"github.com/jadoint/micro/pkg/hash"
@@ -14,7 +15,7 @@ import (
 	"github.com/jadoint/micro/pkg/visitor"
 )
 
-func (env *Env) login(w http.ResponseWriter, r *http.Request) {
+func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	v := visitor.GetVisitor(r)
 	if v.ID > 0 {
 		errutil.Send(w, "Already logged in", http.StatusForbidden)
@@ -37,7 +38,7 @@ func (env *Env) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Authentication
-	u, _ := env.GetUserByUsername(ul.Username)
+	u, _ := GetUserByUsername(clients, ul.Username)
 	if ul.Username != u.Username {
 		errutil.Send(w, "Username and password do not match", http.StatusUnauthorized)
 		return

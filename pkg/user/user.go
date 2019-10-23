@@ -10,6 +10,7 @@ import (
 	// Standard anonymous sql driver import
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/hash"
 	"github.com/jadoint/micro/pkg/logger"
 )
@@ -73,8 +74,8 @@ type PasswordChange struct {
 }
 
 // GetUser gets single user including password
-func (env *Env) GetUser(idUser int64) (*User, error) {
-	db := env.clients.DB.Read
+func GetUser(clients *conn.Clients, idUser int64) (*User, error) {
+	db := clients.DB.Read
 	u := &User{}
 	err := db.QueryRow(`
 		SELECT id_user AS id, username, password, created
@@ -93,8 +94,8 @@ func (env *Env) GetUser(idUser int64) (*User, error) {
 }
 
 // GetUserByUsername gets single user including password
-func (env *Env) GetUserByUsername(username string) (*User, error) {
-	db := env.clients.DB.Read
+func GetUserByUsername(clients *conn.Clients, username string) (*User, error) {
+	db := clients.DB.Read
 	u := &User{}
 	err := db.QueryRow(`
 		SELECT id_user AS id, username, password, created
@@ -113,8 +114,8 @@ func (env *Env) GetUserByUsername(username string) (*User, error) {
 }
 
 // GetUsername gets username by id
-func (env *Env) GetUsername(idUser int64) (string, error) {
-	db := env.clients.DB.Read
+func GetUsername(clients *conn.Clients, idUser int64) (string, error) {
+	db := clients.DB.Read
 	var u User
 	err := db.QueryRow(`
 		SELECT username
@@ -134,7 +135,7 @@ func (env *Env) GetUsername(idUser int64) (string, error) {
 }
 
 // GetUsernames creates a slice of username and ID pairs
-func (env *Env) GetUsernames(uids *IDs) ([]*Username, error) {
+func GetUsernames(clients *conn.Clients, uids *IDs) ([]*Username, error) {
 	var csvUserIds string
 	for _, v := range uids.IDs {
 		id := strconv.FormatInt(v, 10)
@@ -145,7 +146,7 @@ func (env *Env) GetUsernames(uids *IDs) ([]*Username, error) {
 	}
 	csvUserIds = csvUserIds[1:]
 
-	db := env.clients.DB.Read
+	db := clients.DB.Read
 	rows, err := db.Query(`
 		SELECT id_user, username
 		FROM user
@@ -175,12 +176,12 @@ func (env *Env) GetUsernames(uids *IDs) ([]*Username, error) {
 }
 
 // AddUser inserts user into user table
-func (env *Env) AddUser(ur *Registration, rr *RecaptchaResponse) (int64, error) {
+func AddUser(clients *conn.Clients, ur *Registration, rr *RecaptchaResponse) (int64, error) {
 	passwordHash, err := hash.Generate(ur.Password)
 	if err != nil {
 		return 0, err
 	}
-	res, err := env.clients.DB.Exec(`
+	res, err := clients.DB.Exec(`
 		INSERT INTO user(username, password, email)
 		VALUES(?, ?, ?)`,
 		ur.Username, passwordHash, ur.Email)
@@ -197,7 +198,7 @@ func (env *Env) AddUser(ur *Registration, rr *RecaptchaResponse) (int64, error) 
 		lastError = strings.Join(rr.ErrorCodes, ",")
 	}
 
-	_, err = env.clients.DB.Exec(`
+	_, err = clients.DB.Exec(`
 		INSERT INTO recaptcha_log(id_user, score, action, last_error)
 		VALUES(?, ?, ?, ?)`,
 		idUser, rr.Score, rr.Action, lastError)
@@ -209,13 +210,13 @@ func (env *Env) AddUser(ur *Registration, rr *RecaptchaResponse) (int64, error) 
 }
 
 // ChangePassword changes a user's password
-func (env *Env) ChangePassword(idUser int64, newPassword string) error {
+func ChangePassword(clients *conn.Clients, idUser int64, newPassword string) error {
 	passwordHash, err := hash.Generate(newPassword)
 	if err != nil {
 		return err
 	}
 
-	_, err = env.clients.DB.Exec(`
+	_, err = clients.DB.Exec(`
 		UPDATE user
 		SET password = ?
 		WHERE id_user = ?
@@ -229,8 +230,8 @@ func (env *Env) ChangePassword(idUser int64, newPassword string) error {
 }
 
 // GetAbout gets user_profile details of a user
-func (env *Env) GetAbout(idUser int64) (*About, error) {
-	db := env.clients.DB.Read
+func GetAbout(clients *conn.Clients, idUser int64) (*About, error) {
+	db := clients.DB.Read
 	var title sql.NullString
 	var about sql.NullString
 	err := db.QueryRow(`
@@ -258,8 +259,8 @@ func (env *Env) GetAbout(idUser int64) (*About, error) {
 }
 
 // UpdateAbout updates user_profile details of a user
-func (env *Env) UpdateAbout(idUser int64, a *About) error {
-	_, err := env.clients.DB.Exec(`
+func UpdateAbout(clients *conn.Clients, idUser int64, a *About) error {
+	_, err := clients.DB.Exec(`
 		UPDATE user_profile
 		SET title = ?, about = ?
 		WHERE id_user = ?
@@ -272,8 +273,8 @@ func (env *Env) UpdateAbout(idUser int64, a *About) error {
 }
 
 // DeleteAbout deletes user_profile details of a user
-func (env *Env) DeleteAbout(idUser int64) error {
-	_, err := env.clients.DB.Exec(`
+func DeleteAbout(clients *conn.Clients, idUser int64) error {
+	_, err := clients.DB.Exec(`
 		UPDATE user_profile
 		SET title = NULL, about = NULL
 		WHERE id_user = ?

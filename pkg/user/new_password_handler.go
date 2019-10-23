@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/errutil"
 	"github.com/jadoint/micro/pkg/hash"
 	"github.com/jadoint/micro/pkg/logger"
@@ -11,7 +12,7 @@ import (
 	"github.com/jadoint/micro/pkg/visitor"
 )
 
-func (env *Env) newPassword(w http.ResponseWriter, r *http.Request) {
+func newPassword(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	v := visitor.GetVisitor(r)
 	if v.ID == 0 {
 		errutil.Send(w, "Not logged in", http.StatusForbidden)
@@ -34,7 +35,7 @@ func (env *Env) newPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Authentication
-	u, _ := env.GetUserByUsername(v.Name)
+	u, _ := GetUserByUsername(clients, v.Name)
 	isMatchingPasswords, err := hash.VerifyPassword(pc.OldPassword, u.Password)
 	logger.HandleError(err)
 	if !isMatchingPasswords {
@@ -43,7 +44,7 @@ func (env *Env) newPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Save new password
-	err = env.ChangePassword(v.ID, pc.NewPassword)
+	err = ChangePassword(clients, v.ID, pc.NewPassword)
 
 	// Response
 	res, err := json.Marshal(struct {

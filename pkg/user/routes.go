@@ -19,15 +19,9 @@ import (
 	"github.com/jadoint/micro/pkg/visitor"
 )
 
-// Env connection environment
-type Env struct {
-	clients *conn.Clients
-}
-
 // RouteAuth handles signups
 func RouteAuth(clients *conn.Clients) chi.Router {
 	r := chi.NewRouter()
-	env := &Env{clients: clients}
 
 	// Rate limiter: first argument is "x requests / second" per IP
 	lmt := tollbooth.NewLimiter(10, &limiter.ExpirableOptions{DefaultExpirationTTL: time.Hour})
@@ -44,15 +38,15 @@ func RouteAuth(clients *conn.Clients) chi.Router {
 	})
 
 	r.Post("/signup", func(w http.ResponseWriter, r *http.Request) {
-		env.signup(w, r)
+		signup(w, r, clients)
 	})
 
 	r.Post("/login", func(w http.ResponseWriter, r *http.Request) {
-		env.login(w, r)
+		login(w, r, clients)
 	})
 
 	r.Post("/new-password", func(w http.ResponseWriter, r *http.Request) {
-		env.newPassword(w, r)
+		newPassword(w, r, clients)
 	})
 
 	r.Post("/logout", logout)
@@ -63,7 +57,6 @@ func RouteAuth(clients *conn.Clients) chi.Router {
 // RouteUser handles user requests
 func RouteUser(clients *conn.Clients) chi.Router {
 	r := chi.NewRouter()
-	env := &Env{clients: clients}
 
 	// Rate limiter: first argument is "x requests / second" per IP
 	lmt := tollbooth.NewLimiter(100, &limiter.ExpirableOptions{DefaultExpirationTTL: time.Hour})
@@ -78,7 +71,7 @@ func RouteUser(clients *conn.Clients) chi.Router {
 		}
 		idUser := int64(idUserParam)
 
-		username, err := env.GetUsername(idUser)
+		username, err := GetUsername(clients, idUser)
 		if err != nil {
 			errutil.Send(w, "", http.StatusNotFound)
 			return
@@ -114,7 +107,7 @@ func RouteUser(clients *conn.Clients) chi.Router {
 			return
 		}
 
-		names, err := env.GetUsernames(&uids)
+		names, err := GetUsernames(clients, &uids)
 		if err != nil {
 			errutil.Send(w, "", http.StatusNotFound)
 			return
@@ -137,7 +130,7 @@ func RouteUser(clients *conn.Clients) chi.Router {
 		}
 		idUser := int64(idUserParam)
 
-		a, err := env.GetAbout(idUser)
+		a, err := GetAbout(clients, idUser)
 		if err != nil {
 			errutil.Send(w, "", http.StatusNotFound)
 			return
@@ -191,7 +184,7 @@ func RouteUser(clients *conn.Clients) chi.Router {
 		}
 
 		// Save
-		err = env.UpdateAbout(v.ID, &a)
+		err = UpdateAbout(clients, v.ID, &a)
 		if err != nil {
 			logger.Panic(err.Error(), "Update About", v.ID)
 		}
@@ -219,7 +212,7 @@ func RouteUser(clients *conn.Clients) chi.Router {
 		}
 
 		// Delete
-		err = env.DeleteAbout(v.ID)
+		err = DeleteAbout(clients, v.ID)
 		if err != nil {
 			logger.Panic(err.Error(), "Delete About", v.ID)
 		}

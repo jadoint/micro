@@ -11,6 +11,7 @@ import (
 	// Standard anonymous sql driver import
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/logger"
 	"github.com/jadoint/micro/pkg/validate"
 )
@@ -42,8 +43,8 @@ func (t *Tag) Validate() error {
 }
 
 // GetFrequentTags gets most frequently used tags
-func (env *Env) GetFrequentTags() ([]*string, error) {
-	db := env.clients.DB.Read
+func GetFrequentTags(clients *conn.Clients) ([]*string, error) {
+	db := clients.DB.Read
 	rows, err := db.Query(`
 		SELECT tag
 		FROM tag
@@ -74,8 +75,8 @@ func (env *Env) GetFrequentTags() ([]*string, error) {
 }
 
 // GetTagsCSV Get CSV of a blog's tags
-func (env *Env) GetTagsCSV(idBlog int64) (string, error) {
-	db := env.clients.DB.Read
+func GetTagsCSV(clients *conn.Clients, idBlog int64) (string, error) {
+	db := clients.DB.Read
 	var tagCsv string
 	err := db.QueryRow(`
 		SELECT tags
@@ -129,11 +130,11 @@ func DeleteTagsCSV(tx *sql.Tx, idBlog int64) error {
 }
 
 // AddTag inserts a tag into the tag table
-func (env *Env) AddTag(idBlog int64, t *Tag) (int64, error) {
+func AddTag(clients *conn.Clients, idBlog int64, t *Tag) (int64, error) {
 	t.Tag = strings.ToLower(t.Tag)
 
 	// Get/Set tag csv for blog_tags
-	tagCsv, _ := env.GetTagsCSV(idBlog)
+	tagCsv, _ := GetTagsCSV(clients, idBlog)
 	var tags []string
 	if tagCsv != "" {
 		tags = strings.Split(tagCsv, ",")
@@ -148,7 +149,7 @@ func (env *Env) AddTag(idBlog int64, t *Tag) (int64, error) {
 		}
 	}
 
-	tx, err := env.clients.DB.Master.Begin()
+	tx, err := clients.DB.Master.Begin()
 	if err != nil {
 		return 0, err
 	}
@@ -198,9 +199,9 @@ func (env *Env) AddTag(idBlog int64, t *Tag) (int64, error) {
 }
 
 // DeleteTag deletes a tag from the tag table
-func (env *Env) DeleteTag(idBlog int64, tag string) error {
+func DeleteTag(clients *conn.Clients, idBlog int64, tag string) error {
 	// Get/Delete tag from csv in blog_tags
-	tagCsv, _ := env.GetTagsCSV(idBlog)
+	tagCsv, _ := GetTagsCSV(clients, idBlog)
 	var tags []string
 	if tagCsv != "" {
 		tags = strings.Split(tagCsv, ",")
@@ -217,7 +218,7 @@ func (env *Env) DeleteTag(idBlog int64, tag string) error {
 	}
 	newTagCsv := strings.Join(tags, ",")
 
-	tx, err := env.clients.DB.Master.Begin()
+	tx, err := clients.DB.Master.Begin()
 	if err != nil {
 		return err
 	}
@@ -231,7 +232,7 @@ func (env *Env) DeleteTag(idBlog int64, tag string) error {
 		return err
 	}
 
-	idTag, err := env.GetIDByTag(tag)
+	idTag, err := GetIDByTag(clients, tag)
 	if err != nil {
 		return err
 	}
@@ -268,8 +269,8 @@ func (env *Env) DeleteTag(idBlog int64, tag string) error {
 }
 
 // GetIDByTag gets a tag ID by its tag
-func (env *Env) GetIDByTag(tag string) (int64, error) {
-	db := env.clients.DB.Read
+func GetIDByTag(clients *conn.Clients, tag string) (int64, error) {
+	db := clients.DB.Read
 	var t Tag
 	err := db.QueryRow(`
 		SELECT id_tag
@@ -288,8 +289,8 @@ func (env *Env) GetIDByTag(tag string) (int64, error) {
 }
 
 // GetTagByID gets a tag by its tag ID
-func (env *Env) GetTagByID(idTag int64) (string, error) {
-	db := env.clients.DB.Read
+func GetTagByID(clients *conn.Clients, idTag int64) (string, error) {
+	db := clients.DB.Read
 	var t Tag
 	err := db.QueryRow(`
 		SELECT tag

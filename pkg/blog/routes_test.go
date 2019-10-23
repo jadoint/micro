@@ -181,9 +181,8 @@ func TestPostBlogSuccess(t *testing.T) {
 	clients := &conn.Clients{DB: dbClient}
 	defer clients.DB.Master.Close()
 	defer clients.DB.Read.Close()
-	env := &Env{clients: clients}
 
-	dbBlog, err := env.Get(newBlog.ID)
+	dbBlog, err := Get(clients, newBlog.ID)
 	if err != nil {
 		t.Errorf("TestPostBlogSuccess failed with error: %s", err.Error())
 	}
@@ -207,7 +206,7 @@ func TestPostBlogSuccess(t *testing.T) {
 	}
 
 	// DB cleanup
-	err = env.Delete(newBlog.ID)
+	err = Delete(clients, newBlog.ID)
 	if err != nil {
 		t.Errorf("TestPostBlogSuccess:Cleanup failed with error: %s", err.Error())
 	}
@@ -291,9 +290,8 @@ func TestUpdateBlogSuccess(t *testing.T) {
 	clients := &conn.Clients{DB: dbClient}
 	defer clients.DB.Master.Close()
 	defer clients.DB.Read.Close()
-	env := &Env{clients: clients}
 
-	got, err := env.Get(b.ID)
+	got, err := Get(clients, b.ID)
 	if err != nil {
 		t.Errorf("TestUpdateBlogSuccess failed with error: %s", err.Error())
 	}
@@ -327,7 +325,7 @@ func TestUpdateBlogSuccess(t *testing.T) {
 		IsDraft:    false,
 		Modified:   want.Modified,
 	}
-	err = env.Update(original)
+	err = Update(clients, original)
 	if err != nil {
 		t.Errorf("TestUpdateBlogSuccess:Cleanup failed with error: %s", err.Error())
 	}
@@ -349,7 +347,6 @@ func TestDeleteBlogSuccess(t *testing.T) {
 	clients := &conn.Clients{DB: dbClient}
 	defer clients.DB.Master.Close()
 	defer clients.DB.Read.Close()
-	env := &Env{clients: clients}
 
 	b := &Blog{
 		IDAuthor:   1,
@@ -359,13 +356,13 @@ func TestDeleteBlogSuccess(t *testing.T) {
 		IsUnlisted: false,
 		IsDraft:    false,
 	}
-	idBlog, err := env.Add(b)
+	idBlog, err := Add(clients, b)
 	if err != nil {
 		t.Errorf("TestDeleteBlogSuccess:Setup failed with error: %s", err.Error())
 	}
 
 	// Check inserted blog
-	dbBlog, err := env.Get(idBlog)
+	dbBlog, err := Get(clients, idBlog)
 	if err != nil {
 		t.Errorf("TestDeleteBlogSuccess failed with error: %s", err.Error())
 	}
@@ -417,7 +414,7 @@ func TestDeleteBlogSuccess(t *testing.T) {
 	}
 
 	// Verify the delete in the database
-	_, err = env.Get(idBlog)
+	_, err = Get(clients, idBlog)
 	if err == nil {
 		t.Errorf("TestDeleteBlogSuccess failed (deleted entry found) with error: %s", err.Error())
 	}
