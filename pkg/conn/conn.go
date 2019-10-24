@@ -1,7 +1,7 @@
 package conn
 
 import (
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v7"
 
 	"github.com/jadoint/micro/pkg/db"
 )

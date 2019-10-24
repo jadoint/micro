@@ -8,7 +8,7 @@ import (
 func UGC() *bluemonday.Policy {
 	ugc := bluemonday.UGCPolicy()
 	ugc.AllowAttrs("style").OnElements("span", "p", "div", "em", "i", "b", "strong")
-	ugc.RequireNoReferrerOnLinks(true)
+	ugc.RequireNoFollowOnFullyQualifiedLinks(true)
 	// Permits the "dir", "id", "lang", "title" attributes globally
 	ugc.AllowStandardAttributes()
 	// Permits the "img" element and its standard attributes
