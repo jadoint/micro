@@ -2,11 +2,35 @@
 
 Production-ready template for Go + React / Redux microservice applications. Sample website running micro: [https://www.davidado.com/](https://www.davidado.com/)
 
-## Why?
+## Description
 
-Micro is a production-ready template for more complex applications so it may seem needlessly complicated just for a blog. I went the microservices route primarily because in my current monoliths, database schema changes and large updates to big tables (> 50 GB) cause slave lag that affects all other unrelated services. Separating domains into their own databases and codebases was a way to reduce side effects to other services so that a disruption in one does not affect the other (e.g. if the user service goes down, you can still view the blog posts but you just won't see the author).
+Micro is a production-ready microservices template.
 
-One peculiarity you might notice is the call to two (or more) APIs when one can do like a call to `/api/v1/blog/1` and then `/api/v1/blog/1/blog_1_20190911180259.json`. I've placed requests for content that does not change very often under the `.json` extension to enable caching for large text data. You can configure your server to set a long max-age header for `.json` responses which tells a user's browser to cache that post for future visits. Better yet, you can place your application behind a reverse proxy like Cloudflare and set a Page Rule like `www.yoursite.com/*.json` => `Cache Level: Cache Everything` and `Edge Cache TTL: a month` so that all requests for that resource are delivered by their CDN. Doing this for one of my popular applications reduced my cloud egress bandwidth costs by 60%.
+`/cmd` is the entrypoint for each service so you can run `go run cmd/blog/main.go` and `go run cmd/user/main.go` during development.
+
+`/pkg` contains all importable packages:
+
+- `/blog` blog service
+- `/clean` strips user-submitted content of XSS vulnerabilities
+- `/conn` struct containing database and cache connection clients
+- `/contextkey` keys for use with context
+- `/cookie` cookie helper
+- `/db` database and query helper
+- `/env` .env configuration loader
+- `/errutil` error helper
+- `/fmtdate` date helper
+- `/hash` argon2 hash helper
+- `/logger` custom error logger
+- `/msg` sends json messages to the end user
+- `/paginate` pagination helper
+- `/token` JWT helper
+- `/user` user service
+- `/useragent` user-agent helper
+- `/validate` struct validator
+- `/visitor` creates and contains details about a visitor
+- `/words` word count and word censor
+
+`/web` contains frontend code like React components and public files.
 
 ## Installation
 
@@ -34,10 +58,10 @@ Debian/Ubuntu setup: To install the binaries as a service to be managed by `syst
 
 Copy `deploy-web-sample.sh` to `deploy-web.sh` and configure settings according to your environment. Running this scripts creates a production-ready build of the React application (runs `yarn build` in `/web`) and uploads it to your server.
 
-## Development
+### Edge Server (CDN) Caching
 
-`/cmd` is the entrypoint for each service so you can run `go run cmd/blog/main.go` and `go run cmd/user/main.go` during development.
+Many API calls are .json requests such as `/api/v1/blog/1/blog_1_20190911180259.json` to enable caching for large text data. You can configure your server to set a long max-age header for `.json` responses which tells a user's browser to cache that post for future visits. Better yet, you can place your application behind a reverse proxy like Cloudflare and set a Page Rule like `www.yoursite.com/*.json` => `Cache Level: Cache Everything` and `Edge Cache TTL: a month` so that all requests for that resource are delivered by their CDN. Doing this for one of my popular applications reduced my cloud egress bandwidth costs by 60%.
 
-`/pkg` contains all internal packages that can be imported (i.e. you're going to be writing most of your Go code in here).
+## Addendum
 
-`/web` contains frontend code like React components and public files.
+I went the microservices route primarily because in my current monoliths, database schema changes and large updates to big tables (> 50 GB) cause slave lag that affects all other unrelated services. Separating domains into their own databases and codebases was a way to reduce side effects to other services so that a disruption in one does not affect the other (i.e. if the user service goes down, you can still view the blog posts even if you won't see the author).
