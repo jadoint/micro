@@ -33,7 +33,7 @@ web/build/
 docker-compose.yml
 
 # Ignore all build executables
-deployments/bin/*/*_service
+*_service
 
 # Systemd configuration
 deployments/bin/*/*.service
@@ -43,5 +43,7 @@ deploy-services.sh
 deploy-web.sh
 
 # Ignore TLS files
+localhost.key
+localhost.pem
 site.key
 site.pem

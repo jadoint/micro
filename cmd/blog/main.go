@@ -32,10 +32,13 @@ func main() {
 	defer file.Close()
 	log.SetOutput(file)
 
-	// Environment variables
-	err = env.Load()
-	if err != nil {
-		log.Fatal(err.Error())
+	// Load environment variables if
+	// not already set.
+	if os.Getenv("LISTEN") == "" {
+		err = env.Load()
+		if err != nil {
+			log.Fatal(err.Error())
+		}
 	}
 
 	// Database

@@ -1,0 +1,6 @@
+FROM golang:latest
+LABEL Name=go-micro-blog
+WORKDIR /home/app
+RUN go get github.com/githubnemo/CompileDaemon
+ENTRYPOINT CompileDaemon --build="go build -o micro_blog_service /home/app/cmd/blog/main.go" --command="./micro_blog_service" --exclude-dir=.git --exclude-dir=web --exclude-dir=deployments
+EXPOSE 8001

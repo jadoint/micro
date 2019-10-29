@@ -1,0 +1,10 @@
+FROM node:alpine
+LABEL Name=web-micro
+
+WORKDIR "/home/app"
+
+# COPY package.json .
+# RUN npm install
+# COPY . .
+
+CMD ["yarn", "start"]

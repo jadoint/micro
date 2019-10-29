@@ -1,8 +1,8 @@
 version: "3"
 
 services:
-  micro-redis:
-    image: dockerhub_name/micro-redis:0.1
+  redis-micro:
+    image: dockerhub_name/redis-micro
     build:
       context: ./
     ports:
