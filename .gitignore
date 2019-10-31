@@ -44,6 +44,8 @@ deploy-web.sh
 
 # Ignore TLS files
 localhost.key
+localhost.crt
 localhost.pem
 site.key
+site.crt
 site.pem

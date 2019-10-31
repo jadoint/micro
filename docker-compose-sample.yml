@@ -27,7 +27,7 @@ services:
       - IS_SECURE_COOKIE=true
       - JWT_ALGO=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
       - JWT_KEY=abcdefghijklmnopqrstuvwxyz123456
-      - TLS_CERT=/home/app/deployments/tls/localhost.pem
+      - TLS_CERT=/home/app/deployments/tls/localhost.crt
       - TLS_KEY=/home/app/deployments/tls/localhost.key
     restart: always
     depends_on:
@@ -59,7 +59,7 @@ services:
       - IS_SECURE_COOKIE=true
       - JWT_ALGO=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
       - JWT_KEY=abcdefghijklmnopqrstuvwxyz123456
-      - TLS_CERT=/home/app/deployments/tls/localhost.pem
+      - TLS_CERT=/home/app/deployments/tls/localhost.crt
       - TLS_KEY=/home/app/deployments/tls/localhost.key
       - RECAPTCHA_KEY=abcdefghijklmnopqrstuvwxyz123456
       - RECAPTCHA_SCORE_THRESHOLD=0.5
@@ -109,3 +109,24 @@ services:
     ports:
       - "6379:6379"
     restart: always
+  web:
+    image: node:alpine
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web:/home/app
+  nginx:
+    restart: always
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:80"
+      - "8081:443"
+    depends_on:
+      - blog
+      - user
+      - web
