@@ -9,12 +9,13 @@ require (
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-chi/cors v1.0.0
 	github.com/go-playground/locales v0.13.0
-	github.com/go-playground/universal-translator v0.16.0
+	github.com/go-playground/universal-translator v0.17.0
+	github.com/go-playground/validator v9.30.0+incompatible
+	github.com/go-playground/validator/v10 v10.0.1
 	github.com/go-redis/redis v6.15.6+incompatible
 	github.com/go-redis/redis/v7 v7.0.0-beta.4
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/joho/godotenv v1.3.0
-	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
