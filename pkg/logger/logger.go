@@ -2,6 +2,7 @@ package logger
 
 import (
 	"log"
+	"os"
 	"runtime"
 )
 
@@ -46,6 +47,13 @@ func LogError(err error) {
 // runtime.Caller(1), would only give HandleError() the line
 // number in Panic() and not where the actual error occurred.
 func logAndPanic(v ...interface{}) {
+	errFile, err := os.OpenFile("errors.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Print(err.Error())
+	}
+	defer errFile.Close()
+	log.SetOutput(errFile)
+
 	_, file, line, _ := runtime.Caller(2)
 	if len(v) > 0 {
 		log.Panic(file, ":", line, " ", v)
@@ -56,6 +64,13 @@ func logAndPanic(v ...interface{}) {
 
 // logAndFatal logs error and calls Fatal.
 func logAndFatal(v ...interface{}) {
+	errFile, err := os.OpenFile("errors.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Print(err.Error())
+	}
+	defer errFile.Close()
+	log.SetOutput(errFile)
+
 	_, file, line, _ := runtime.Caller(2)
 	if len(v) > 0 {
 		log.Fatal(file, ":", line, " ", v)
@@ -66,6 +81,13 @@ func logAndFatal(v ...interface{}) {
 
 // logAndContinue only logs the error.
 func logAndContinue(v ...interface{}) {
+	errFile, err := os.OpenFile("errors.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Print(err.Error())
+	}
+	defer errFile.Close()
+	log.SetOutput(errFile)
+
 	_, file, line, _ := runtime.Caller(2)
 	if len(v) > 0 {
 		log.Println(file, ":", line, " ", v)

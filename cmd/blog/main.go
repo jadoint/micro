@@ -24,18 +24,10 @@ import (
 )
 
 func main() {
-	// Logging
-	file, err := os.OpenFile("errors.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Print(err.Error())
-	}
-	defer file.Close()
-	log.SetOutput(file)
-
 	// Load environment variables if
 	// not already set.
 	if os.Getenv("LISTEN") == "" {
-		err = env.Load()
+		err := env.Load()
 		if err != nil {
 			log.Fatal(err.Error())
 		}
