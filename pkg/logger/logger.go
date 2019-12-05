@@ -11,6 +11,12 @@ func Panic(v ...interface{}) {
 	logAndPanic(v)
 }
 
+// Fatal logs caller filename and line number and
+// sends an Internal Server error code to the user.
+func Fatal(v ...interface{}) {
+	logAndFatal(v)
+}
+
 // HandleError will log error and panic
 // if an error is found.
 func HandleError(err error) {
@@ -35,5 +41,15 @@ func logAndPanic(v ...interface{}) {
 		log.Panic(file, ":", line, " ", v)
 	} else {
 		log.Panic(file, ":", line)
+	}
+}
+
+// logAndFatal logs error and calls Fatal.
+func logAndFatal(v ...interface{}) {
+	_, file, line, _ := runtime.Caller(2)
+	if len(v) > 0 {
+		log.Fatal(file, ":", line, " ", v)
+	} else {
+		log.Fatal(file, ":", line)
 	}
 }
