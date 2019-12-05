@@ -28,6 +28,16 @@ func HandleError(err error) {
 	logAndPanic(errMsg)
 }
 
+// LogError will only log the error
+func LogError(err error) {
+	if err == nil {
+		return
+	}
+
+	errMsg := err.Error()
+	logAndContinue(errMsg)
+}
+
 // logAndPanic logs error and panics.
 // Note: It would be a mistake to move this code to Panic()
 // and call Panic() in HandleError() because runtime.Caller()
@@ -51,5 +61,15 @@ func logAndFatal(v ...interface{}) {
 		log.Fatal(file, ":", line, " ", v)
 	} else {
 		log.Fatal(file, ":", line)
+	}
+}
+
+// logAndContinue only logs the error.
+func logAndContinue(v ...interface{}) {
+	_, file, line, _ := runtime.Caller(2)
+	if len(v) > 0 {
+		log.Println(file, ":", line, " ", v)
+	} else {
+		log.Println(file, ":", line)
 	}
 }
