@@ -79,7 +79,6 @@ func NotifyDevice(cfg *Config) {
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println(err.Error(), "NotifyDevice - ioutil.ReadAll()")
+		log.Println(err.Error(), string(body), "NotifyDevice - ioutil.ReadAll()")
 	}
-	log.Println(string(body))
 }
