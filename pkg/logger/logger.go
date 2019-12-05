@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -56,8 +57,10 @@ func logAndPanic(v ...interface{}) {
 
 	_, file, line, _ := runtime.Caller(2)
 	if len(v) > 0 {
+		fmt.Println(file, ":", line, " ", v)
 		log.Panic(file, ":", line, " ", v)
 	} else {
+		fmt.Println(file, ":", line)
 		log.Panic(file, ":", line)
 	}
 }
@@ -73,8 +76,10 @@ func logAndFatal(v ...interface{}) {
 
 	_, file, line, _ := runtime.Caller(2)
 	if len(v) > 0 {
+		fmt.Println(file, ":", line, " ", v)
 		log.Fatal(file, ":", line, " ", v)
 	} else {
+		fmt.Println(file, ":", line)
 		log.Fatal(file, ":", line)
 	}
 }
@@ -90,8 +95,10 @@ func logAndContinue(v ...interface{}) {
 
 	_, file, line, _ := runtime.Caller(2)
 	if len(v) > 0 {
+		fmt.Println(file, ":", line, " ", v)
 		log.Println(file, ":", line, " ", v)
 	} else {
+		fmt.Println(file, ":", line)
 		log.Println(file, ":", line)
 	}
 }
