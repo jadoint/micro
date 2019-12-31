@@ -2,9 +2,7 @@ FROM node:13-alpine AS builder
 WORKDIR /build/app
 
 COPY ./web/package.json .
-
-RUN mkdir -p build
-COPY ./web/build ./build
+RUN yarn build
 
 # Production build
 FROM nginx:mainline-alpine
