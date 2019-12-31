@@ -19,7 +19,7 @@
 -- Table structure for table `blog`
 --
 
-DROP TABLE IF EXISTS `blog`;
+-- DROP TABLE IF EXISTS `blog`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `blog` (
@@ -85,7 +85,7 @@ DELIMITER ;
 -- Table structure for table `blog_settings`
 --
 
-DROP TABLE IF EXISTS `blog_settings`;
+-- DROP TABLE IF EXISTS `blog_settings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `blog_settings` (
@@ -102,7 +102,7 @@ CREATE TABLE `blog_settings` (
 -- Table structure for table `blog_tag`
 --
 
-DROP TABLE IF EXISTS `blog_tag`;
+-- DROP TABLE IF EXISTS `blog_tag`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `blog_tag` (
@@ -119,7 +119,7 @@ CREATE TABLE `blog_tag` (
 -- Table structure for table `blog_tags`
 --
 
-DROP TABLE IF EXISTS `blog_tags`;
+-- DROP TABLE IF EXISTS `blog_tags`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `blog_tags` (
@@ -136,7 +136,7 @@ CREATE TABLE `blog_tags` (
 -- Table structure for table `blog_views`
 --
 
-DROP TABLE IF EXISTS `blog_views`;
+-- DROP TABLE IF EXISTS `blog_views`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `blog_views` (
@@ -151,7 +151,7 @@ CREATE TABLE `blog_views` (
 -- Table structure for table `tag`
 --
 
-DROP TABLE IF EXISTS `tag`;
+-- DROP TABLE IF EXISTS `tag`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tag` (

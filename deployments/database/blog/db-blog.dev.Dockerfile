@@ -1,7 +1,6 @@
 FROM mysql:8.0
-LABEL Name=db-micro-user
 
-ENV MYSQL_DATABASE user
+ENV MYSQL_DATABASE blog
 
 # Percona package to to install
 # ENV PACKAGE percona-xtrabackup-24
@@ -24,18 +23,18 @@ ENV MYSQL_DATABASE user
 # Add the contents of the sql-scripts/ directory to your image.
 # All scripts in docker-entrypoint-initdb.d/ are automatically
 # executed during container startup.
-COPY ./sql-scripts/ /docker-entrypoint-initdb.d/
+# COPY ./sql-scripts/ /docker-entrypoint-initdb.d/
 
 # Build this image.
-# docker build -t dockerhub_username/micro-user:0.1 .
+# docker build -t dockerhub_username/micro-blog:0.1 .
 
 # Start the MySql container.
 # -v option mounts a host volume to the container
 # where [host_dir]:[container_dir]
-# docker run -d -p 3400:3306 --name micro-user -e MYSQL_ROOT_PASSWORD=yourrootpassword -v /micro-user/data:/var/lib/mysql -v /micro-user/backups:/backups -v /micro-user/conf:/etc/mysql/conf.d micro-user:0.1
+# docker run -d -p 3306:3306 --name micro-blog -e MYSQL_ROOT_PASSWORD=yourrootpassword -v /micro-blog/data:/var/lib/mysql -v /micro-blog/backups:/backups -v /micro-blog/conf:/etc/mysql/conf.d micro-blog:0.1
 
 # Verify database using:
-# docker exec -it micro-user bash
+# docker exec -it micro-blog bash
 # mysql > show databases;
 
-EXPOSE 3400
+EXPOSE 3306

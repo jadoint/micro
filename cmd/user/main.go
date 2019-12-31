@@ -13,7 +13,6 @@ import (
 
 	"github.com/jadoint/micro/pkg/conn"
 	"github.com/jadoint/micro/pkg/db"
-	"github.com/jadoint/micro/pkg/env"
 	"github.com/jadoint/micro/pkg/logger"
 	"github.com/jadoint/micro/pkg/user"
 	"github.com/jadoint/micro/pkg/visitor"
@@ -23,10 +22,7 @@ func main() {
 	// Load environment variables if
 	// not already set.
 	if os.Getenv("LISTEN") == "" {
-		err := env.Load()
-		if err != nil {
-			log.Fatal(err.Error())
-		}
+		log.Fatal("LISTEN is not set")
 	}
 
 	// Database

@@ -3,13 +3,13 @@ const hostname = window && window.location && window.location.hostname;
 let authApiUrl = "https://www.sitename.com/api/v1/auth";
 let userApiUrl = "https://www.sitename.com/api/v1/user";
 let blogApiUrl = "https://www.sitename.com/api/v1/blog";
-if (hostname === "localhost") {
-  authApiUrl = "https://localhost:8000/api/v1/auth";
-  userApiUrl = "https://localhost:8000/api/v1/user";
-  blogApiUrl = "https://localhost:8001/api/v1/blog";
+if (hostname === "local.sitename.com") {
+  authApiUrl = "https://local.sitename.com/api/v1/auth";
+  userApiUrl = "https://local.sitename.com/api/v1/user";
+  blogApiUrl = "https://local.sitename.com/api/v1/blog";
 }
 
-const pageTitle = "David Ado";
+const pageTitle = "Micro Go Blog";
 const headerTitle = "Micro Go Blog";
 
 const header = [

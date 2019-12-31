@@ -29,23 +29,18 @@ node_modules/
 # Web build
 web/build/
 
-# Docker compose yaml
+# YAML
 docker-compose.yml
+docker-stack.yml
 
 # Ignore all build executables
 *_service
-
-# Systemd configuration
-deployments/bin/*/*.service
 
 # Deploy scripts
 deploy-services.sh
 deploy-web.sh
 
 # Ignore TLS files
-localhost.key
-localhost.crt
-localhost.pem
-site.key
-site.crt
-site.pem
+*.key
+*.crt
+*.pem

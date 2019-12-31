@@ -19,7 +19,7 @@
 -- Table structure for table `recaptcha_log`
 --
 
-DROP TABLE IF EXISTS `recaptcha_log`;
+-- DROP TABLE IF EXISTS `recaptcha_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `recaptcha_log` (
@@ -36,7 +36,7 @@ CREATE TABLE `recaptcha_log` (
 -- Table structure for table `user`
 --
 
-DROP TABLE IF EXISTS `user`;
+-- DROP TABLE IF EXISTS `user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user` (
@@ -73,7 +73,7 @@ DELIMITER ;
 -- Table structure for table `user_permission`
 --
 
-DROP TABLE IF EXISTS `user_permission`;
+-- DROP TABLE IF EXISTS `user_permission`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user_permission` (
@@ -89,7 +89,7 @@ CREATE TABLE `user_permission` (
 -- Table structure for table `user_profile`
 --
 
-DROP TABLE IF EXISTS `user_profile`;
+-- DROP TABLE IF EXISTS `user_profile`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user_profile` (
