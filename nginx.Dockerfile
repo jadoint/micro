@@ -2,7 +2,7 @@ FROM node:13-alpine AS builder
 WORKDIR /build/app
 
 COPY ./web/package.json .
-RUN yarn add
+RUN yarn install
 RUN yarn build
 
 # Production build
