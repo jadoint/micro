@@ -1,9 +1,9 @@
 FROM node:13-alpine AS builder
-WORKDIR /build/app
+WORKDIR /build
 
 COPY ./web/package.json .
-RUN yarn install
-RUN yarn build
+RUN yarn create react-app app
+RUN cd app && yarn build
 
 # Production build
 FROM nginx:mainline-alpine
