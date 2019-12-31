@@ -1,4 +1,4 @@
-FROM node:13-alpine AS builder
+FROM node:13 AS builder
 WORKDIR /build/app
 
 COPY ./web/package.json .
