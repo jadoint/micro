@@ -11,4 +11,4 @@ RUN yarn build
 FROM nginx:mainline-alpine
 WORKDIR /home/app
 COPY ./deployments/nginx/default.conf.template /etc/nginx/conf.d/default.conf.template
-COPY --from=builder /build/build .
+COPY --from=builder /build .
