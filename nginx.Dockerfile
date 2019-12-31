@@ -1,8 +1,9 @@
-FROM node:13 AS builder
+FROM node:13-alpine AS builder
 WORKDIR /build/app
 
 COPY ./web/package.json .
-RUN yarn add && yarn build
+RUN yarn add
+RUN yarn build
 
 # Production build
 FROM nginx:mainline-alpine
