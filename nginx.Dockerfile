@@ -1,6 +1,6 @@
 FROM node:13-alpine AS builder
 WORKDIR /build
-COPY ./web/package.json .
+COPY ./web .
 RUN yarn install
 RUN yarn build
 
