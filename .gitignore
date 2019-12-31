@@ -36,8 +36,8 @@ docker-stack.yml
 *_service
 
 # Deploy scripts
-deploy-services.sh
-deploy-web.sh
+docker-swarm-deploy.sh
+docker-swarm-init-deploy.sh
 
 # Ignore TLS files
 *.key
