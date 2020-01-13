@@ -3,6 +3,7 @@ package blog
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -346,7 +347,7 @@ func GetViews(clients *conn.Clients, idBlog int64) (int64, error) {
 func IncrViews(clients *conn.Clients, idBlog int64) (int64, error) {
 	bvKey := fmt.Sprintf("blog:views:%d", idBlog)
 	res := clients.Cache.Get(bvKey)
-	if res.Err() == redis.Nil {
+	if res.Err() != nil && res.Err().Error() == redis.Nil.Error() {
 		// Not found in cache so check the database
 		views, err := GetViews(clients, idBlog)
 		if err != nil {
@@ -365,6 +366,7 @@ func IncrViews(clients *conn.Clients, idBlog int64) (int64, error) {
 
 	views, err := res.Int64()
 	if err != nil {
+		log.Println(err.Error())
 		return 0, err
 	}
 
