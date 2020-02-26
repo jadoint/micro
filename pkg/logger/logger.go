@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strconv"
+	"time"
 )
 
 // Panic logs caller filename and line number and
@@ -40,6 +42,35 @@ func LogError(err error) {
 	logAndContinue(errMsg)
 }
 
+// writeLogMessage to local file and return
+// the written error message.
+func writeLogMessage(v ...interface{}) string {
+	t := time.Now()
+	filename := t.Format("2006-01-02") + ".log"
+	errFile, err := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Print(err.Error())
+	}
+	defer errFile.Close()
+	log.SetOutput(errFile)
+
+	hostname, err := os.Hostname()
+	if err != nil || hostname == "" {
+		hostname = "go"
+	}
+	_, file, line, _ := runtime.Caller(3)
+	// Timestamp, Docker hostname, error message
+	errMsg := t.String() + "," + hostname + "," + file + ": " + strconv.Itoa(line)
+	if len(v) > 0 {
+		// errMsg + custom error message
+		errMsg += " " + fmt.Sprintf("%v", v)
+	}
+	// Write error to console to help with checking
+	// errors in real-time.
+	fmt.Println(errMsg)
+	return errMsg
+}
+
 // logAndPanic logs error and panics.
 // Note: It would be a mistake to move this code to Panic()
 // and call Panic() in HandleError() because runtime.Caller()
@@ -48,57 +79,18 @@ func LogError(err error) {
 // runtime.Caller(1), would only give HandleError() the line
 // number in Panic() and not where the actual error occurred.
 func logAndPanic(v ...interface{}) {
-	errFile, err := os.OpenFile("errors.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Print(err.Error())
-	}
-	defer errFile.Close()
-	log.SetOutput(errFile)
-
-	_, file, line, _ := runtime.Caller(2)
-	if len(v) > 0 {
-		fmt.Println(file, ":", line, " ", v)
-		log.Panic(file, ":", line, " ", v)
-	} else {
-		fmt.Println(file, ":", line)
-		log.Panic(file, ":", line)
-	}
+	errMsg := writeLogMessage(v)
+	log.Panic(errMsg)
 }
 
 // logAndFatal logs error and calls Fatal.
 func logAndFatal(v ...interface{}) {
-	errFile, err := os.OpenFile("errors.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Print(err.Error())
-	}
-	defer errFile.Close()
-	log.SetOutput(errFile)
-
-	_, file, line, _ := runtime.Caller(2)
-	if len(v) > 0 {
-		fmt.Println(file, ":", line, " ", v)
-		log.Fatal(file, ":", line, " ", v)
-	} else {
-		fmt.Println(file, ":", line)
-		log.Fatal(file, ":", line)
-	}
+	errMsg := writeLogMessage(v)
+	log.Fatal(errMsg)
 }
 
 // logAndContinue only logs the error.
 func logAndContinue(v ...interface{}) {
-	errFile, err := os.OpenFile("errors.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Print(err.Error())
-	}
-	defer errFile.Close()
-	log.SetOutput(errFile)
-
-	_, file, line, _ := runtime.Caller(2)
-	if len(v) > 0 {
-		fmt.Println(file, ":", line, " ", v)
-		log.Println(file, ":", line, " ", v)
-	} else {
-		fmt.Println(file, ":", line)
-		log.Println(file, ":", line)
-	}
+	errMsg := writeLogMessage(v)
+	log.Println(errMsg)
 }
