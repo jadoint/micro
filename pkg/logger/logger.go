@@ -52,9 +52,14 @@ func LogError(err error) {
 
 // writeLogMessage to local file
 func writeLogMessage(logType action, v ...interface{}) {
+	dir := "logs"
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.Mkdir(dir, os.ModeDir)
+	}
 	t := time.Now()
 	filename := t.Format("2006-01-02") + ".log"
-	errFile, err := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	filepath := dir + "/" + filename
+	errFile, err := os.OpenFile(filepath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Print(err.Error())
 	}
