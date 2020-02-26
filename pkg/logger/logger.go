@@ -54,7 +54,7 @@ func LogError(err error) {
 func writeLogMessage(logType action, v ...interface{}) {
 	dir := "logs"
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.Mkdir(dir, 0740)
+		os.Mkdir(dir, os.ModePerm)
 	}
 	t := time.Now()
 	filename := t.Format("2006-01-02") + ".log"
