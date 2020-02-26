@@ -9,6 +9,14 @@ import (
 	"time"
 )
 
+type action int
+
+const (
+	logPanic action = iota + 1
+	logFatal
+	logOnly
+)
+
 // Panic logs caller filename and line number and
 // sends an Internal Server error code to the user.
 func Panic(v ...interface{}) {
@@ -42,9 +50,8 @@ func LogError(err error) {
 	logAndContinue(errMsg)
 }
 
-// writeLogMessage to local file and return
-// the written error message.
-func writeLogMessage(v ...interface{}) string {
+// writeLogMessage to local file
+func writeLogMessage(logType action, v ...interface{}) {
 	t := time.Now()
 	filename := t.Format("2006-01-02") + ".log"
 	errFile, err := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
@@ -68,7 +75,17 @@ func writeLogMessage(v ...interface{}) string {
 	// Write error to console to help with checking
 	// errors in real-time.
 	fmt.Println(errMsg)
-	return errMsg
+	// Write error message to local log file
+	switch logType {
+	case logPanic:
+		log.Panic(errMsg)
+	case logFatal:
+		log.Fatal(errMsg)
+	case logOnly:
+		log.Println(errMsg)
+	default:
+		log.Println(errMsg)
+	}
 }
 
 // logAndPanic logs error and panics.
@@ -79,18 +96,15 @@ func writeLogMessage(v ...interface{}) string {
 // runtime.Caller(1), would only give HandleError() the line
 // number in Panic() and not where the actual error occurred.
 func logAndPanic(v ...interface{}) {
-	errMsg := writeLogMessage(v)
-	log.Panic(errMsg)
+	writeLogMessage(logPanic, v)
 }
 
 // logAndFatal logs error and calls Fatal.
 func logAndFatal(v ...interface{}) {
-	errMsg := writeLogMessage(v)
-	log.Fatal(errMsg)
+	writeLogMessage(logFatal, v)
 }
 
 // logAndContinue only logs the error.
 func logAndContinue(v ...interface{}) {
-	errMsg := writeLogMessage(v)
-	log.Println(errMsg)
+	writeLogMessage(logOnly, v)
 }
