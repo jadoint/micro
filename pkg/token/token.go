@@ -30,26 +30,33 @@ func Create(dataClaim *jwt.MapClaims) (string, error) {
 	return tokenString, nil
 }
 
-// Parse prepends the algorithm string to a shortened token,
-// parses and verifies it, and returns the parsed data.
+// Parse prepends the algorithm string to a shortened token, if needed.
+// If the token is not shortened, just parse and verify it, and
+// return the parsed data.
 //
 // Example parsing of returned claims:
 // td.IAT = int64(claims["iat"].(float64))
 // claimsData := claims["data"].(map[string]interface{})
 // td.ID = int64(claimsData["id"].(float64))
 // td.Name = claimsData["name"].(string)
-func Parse(shortToken string) (jwt.MapClaims, error) {
-	// Only storing abbreviated tokens in the cookie to reduce cookie size
-	// so need to prepend algorithm string (HS256) to received token string.
-	tokenString := fmt.Sprintf("%s.%s", os.Getenv("JWT_ALGO"), shortToken)
+func Parse(token string) (jwt.MapClaims, error) {
+	// Determine if the token is a short token or a full one.
+	tokenParts := strings.Split(token, ".")
+	isFullToken := len(tokenParts) == 3
+	tokenString := token
+	if !isFullToken {
+		// Only storing abbreviated tokens in the cookie to reduce cookie size
+		// so need to prepend algorithm string (HS256) to received token string.
+		tokenString = fmt.Sprintf("%s.%s", os.Getenv("JWT_ALGO"), token)
+	}
 	claims := jwt.MapClaims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.ParseWithClaims(tokenString, claims, func(parsedToken *jwt.Token) (interface{}, error) {
 		return []byte(os.Getenv("JWT_KEY")), nil
 	})
 	if err != nil {
 		return claims, err
 	}
-	if !token.Valid {
+	if !parsedToken.Valid {
 		return claims, errors.New("Invalid token")
 	}
 	return claims, nil
