@@ -23,11 +23,11 @@ func TestMakeAuthTokenAndParseToken(t *testing.T) {
 		Name: "Username",
 	}
 	dataClaim := visitor.GetVisitorTokenDataClaim(want.ID, want.Name)
-	shortToken, err := token.Create(dataClaim)
+	tokenString, err := token.Create(dataClaim)
 	if err != nil {
 		t.Errorf("TestMakeAuthTokenAndParseToken:MakeAuthToken failed with error: %s", err.Error())
 	}
-	claims, err := token.Parse(shortToken)
+	claims, err := token.Parse(tokenString)
 	if err != nil {
 		t.Errorf("TestMakeAuthTokenAndParseToken:ParseToken failed with error: %s", err.Error())
 	}

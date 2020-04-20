@@ -23,10 +23,6 @@ func Create(dataClaim *jwt.MapClaims) (string, error) {
 		return "", err
 	}
 
-	// Shorten token string by removing algorithm details
-	tokenParts := strings.Split(tokenString, ".")
-	tokenString = tokenParts[1] + "." + tokenParts[2]
-
 	return tokenString, nil
 }
 
