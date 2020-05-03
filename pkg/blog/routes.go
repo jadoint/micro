@@ -253,13 +253,10 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 	r.Get("/latest", func(w http.ResponseWriter, r *http.Request) {
 		v := visitor.GetVisitor(r)
 
-		pageNum, err := paginate.GetPageNum(r)
-		if err != nil {
-			http.Error(w, "", http.StatusBadRequest)
-			return
-		}
+		pageNum := paginate.GetPageNum(r)
 
 		var blogs []*Blog
+		var err error
 		tagParam := r.URL.Query().Get("tag")
 		if tagParam != "" {
 			// Latest blog listings by tag
