@@ -27,16 +27,17 @@ func New(r *http.Request, pageSize int) Page {
 // GetPageNum gets pageNum from URL query parameter
 func GetPageNum(r *http.Request) int {
 	pageNumParam := r.URL.Query().Get("pageNum")
-	pageNum := 1
-	if pageNumParam != "" {
-		pageNum, err := strconv.Atoi(pageNumParam)
-		if err != nil {
-			logger.LogError(err)
-			return 1
-		}
-		if pageNum <= 0 {
-			return 1
-		}
+	if pageNumParam == "" {
+		return 1
+	}
+
+	pageNum, err := strconv.Atoi(pageNumParam)
+	if err != nil {
+		logger.LogError(err)
+		return 1
+	}
+	if pageNum <= 0 {
+		return 1
 	}
 	return pageNum
 }
