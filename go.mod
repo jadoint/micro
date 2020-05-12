@@ -3,7 +3,7 @@ module github.com/jadoint/micro
 go 1.13
 
 require (
-	github.com/confluentinc/confluent-kafka-go v1.1.0
+	github.com/confluentinc/confluent-kafka-go v1.4.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/didip/tollbooth v4.0.2+incompatible
 	github.com/didip/tollbooth_chi v0.0.0-20170928041846-6ab5f3083f3d
