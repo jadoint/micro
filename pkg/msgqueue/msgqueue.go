@@ -17,9 +17,7 @@ func SendMsg(topic string, msg []byte) {
 		return
 	}
 	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": kafkaServer})
-	if err != nil {
-		panic(err)
-	}
+	logger.LogError(err)
 
 	defer p.Close()
 
