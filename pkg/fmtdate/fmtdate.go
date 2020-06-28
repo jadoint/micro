@@ -17,6 +17,12 @@ func MySQLUTCNow() string {
 	return time.Now().In(loc).Format("2006-01-02 15:04:05")
 }
 
+// MySQLDateNow returns UTC date now in MySql format
+func MySQLDateNow() string {
+	loc, _ := time.LoadLocation("UTC")
+	return time.Now().In(loc).Format("2006-01-02")
+}
+
 // Timespan converts a MySql Datetime string to
 // a timespan format ("how much time ago?").
 func Timespan(mysqlDatetime string) string {
