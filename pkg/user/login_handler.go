@@ -28,7 +28,11 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 
 	var ul Login
 	err := d.Decode(&ul)
-	logger.HandleError(err)
+	if err != nil {
+		logger.Log(err)
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 
 	// Validation
 	err = validate.Struct(ul)
@@ -45,7 +49,11 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	}
 
 	isMatchingPasswords, err := hash.VerifyPassword(ul.Password, u.Password)
-	logger.HandleError(err)
+	if err != nil {
+		logger.Log(err)
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 	if !isMatchingPasswords {
 		errutil.Send(w, "Username and password do not match", http.StatusUnauthorized)
 		return
@@ -54,7 +62,11 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	// JWT
 	dataClaim := visitor.GetVisitorTokenDataClaim(u.ID, u.Username)
 	tokenString, err := token.Create(dataClaim)
-	logger.HandleError(err)
+	if err != nil {
+		logger.Log(err)
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 
 	// Cookie
 	cookie.Add(w, os.Getenv("COOKIE_SESSION_NAME"), tokenString)
@@ -62,7 +74,11 @@ func login(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	// Response
 	u.Created = ""
 	res, err := json.Marshal(u)
-	logger.HandleError(err)
+	if err != nil {
+		logger.Log(err)
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 
 	w.Write(res)
 }

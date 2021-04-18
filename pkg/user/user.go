@@ -86,7 +86,7 @@ func GetUser(clients *conn.Clients, idUser int64) (*User, error) {
 		Scan(&u.ID, &u.Username, &u.Password, &u.Created)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.HandleError(err)
+			logger.Log(err)
 		}
 		return u, err
 	}
@@ -96,7 +96,7 @@ func GetUser(clients *conn.Clients, idUser int64) (*User, error) {
 // GetUserByUsername gets single user including password
 func GetUserByUsername(clients *conn.Clients, username string) (*User, error) {
 	db := clients.DB.Read
-	u := &User{}
+	var u User
 	err := db.QueryRow(`
 		SELECT id_user AS id, username, password, created
 		FROM user
@@ -106,11 +106,11 @@ func GetUserByUsername(clients *conn.Clients, username string) (*User, error) {
 		Scan(&u.ID, &u.Username, &u.Password, &u.Created)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.HandleError(err)
+			logger.Log(err)
 		}
-		return u, err
+		return &u, err
 	}
-	return u, nil
+	return &u, nil
 }
 
 // GetUsername gets username by id
@@ -127,7 +127,7 @@ func GetUsername(clients *conn.Clients, idUser int64) (string, error) {
 		Scan(&u.Username)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.HandleError(err)
+			logger.Log(err)
 		}
 		return u.Username, err
 	}
@@ -163,7 +163,7 @@ func GetUsernames(clients *conn.Clients, uids *IDs) ([]*Username, error) {
 		err := rows.Scan(&u.ID, &u.Username)
 		if err != nil {
 			if err != sql.ErrNoRows {
-				logger.HandleError(err)
+				logger.Log(err)
 			}
 			return nil, err
 		}
@@ -244,7 +244,7 @@ func GetAbout(clients *conn.Clients, idUser int64) (*About, error) {
 		Scan(&title, &about)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.HandleError(err)
+			logger.Log(err)
 		}
 		return nil, err
 	}
@@ -267,6 +267,7 @@ func UpdateAbout(clients *conn.Clients, idUser int64, a *About) error {
 		LIMIT 1`,
 		a.Title, a.About, idUser)
 	if err != nil {
+		logger.Log(err)
 		return err
 	}
 	return nil
@@ -281,6 +282,7 @@ func DeleteAbout(clients *conn.Clients, idUser int64) error {
 		LIMIT 1`,
 		idUser)
 	if err != nil {
+		logger.Log(err)
 		return err
 	}
 	return nil

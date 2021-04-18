@@ -15,7 +15,7 @@ func BoolQueryHandler(clients *conn.Clients, sqlQuery string, args ...interface{
 	err := db.QueryRow(sqlQuery, args...).Scan(&isFound)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.LogError(err)
+			logger.Log(err)
 		}
 		return false
 	}

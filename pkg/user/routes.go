@@ -32,7 +32,11 @@ func RouteAuth(clients *conn.Clients) chi.Router {
 		v := visitor.GetVisitor(r)
 
 		res, err := json.Marshal(v)
-		logger.HandleError(err)
+		if err != nil {
+			logger.Log(err)
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
 
 		w.Write(res)
 	})
@@ -81,7 +85,11 @@ func RouteUser(clients *conn.Clients) chi.Router {
 		res, err := json.Marshal(struct {
 			Username string `json:"username"`
 		}{username})
-		logger.HandleError(err)
+		if err != nil {
+			logger.Log(err)
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
 
 		w.Write(res)
 	})
@@ -93,7 +101,11 @@ func RouteUser(clients *conn.Clients) chi.Router {
 
 		var uids IDs
 		err := d.Decode(&uids)
-		logger.HandleError(err)
+		if err != nil {
+			logger.Log(err)
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
 
 		if len(uids.IDs) == 0 {
 			errutil.Send(w, "", http.StatusBadRequest)
@@ -117,7 +129,11 @@ func RouteUser(clients *conn.Clients) chi.Router {
 		res, err := json.Marshal(struct {
 			Usernames []*Username `json:"usernames"`
 		}{names})
-		logger.HandleError(err)
+		if err != nil {
+			logger.Log(err)
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
 
 		w.Write(res)
 	})
@@ -144,7 +160,11 @@ func RouteUser(clients *conn.Clients) chi.Router {
 			Title: a.Title,
 			About: a.About,
 		})
-		logger.HandleError(err)
+		if err != nil {
+			logger.Log(err)
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
 
 		w.Write(res)
 	})
@@ -170,7 +190,11 @@ func RouteUser(clients *conn.Clients) chi.Router {
 
 		var a About
 		err = d.Decode(&a)
-		logger.HandleError(err)
+		if err != nil {
+			logger.Log(err)
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
 		// Strip inputs of all tags
 		strict := clean.Strict()
 		a.Title = strict.Sanitize(a.Title)
@@ -186,7 +210,8 @@ func RouteUser(clients *conn.Clients) chi.Router {
 		// Save
 		err = UpdateAbout(clients, v.ID, &a)
 		if err != nil {
-			logger.Panic(err.Error(), "Update About", v.ID)
+			http.Error(w, "", http.StatusBadRequest)
+			return
 		}
 
 		// Response
@@ -214,7 +239,8 @@ func RouteUser(clients *conn.Clients) chi.Router {
 		// Delete
 		err = DeleteAbout(clients, v.ID)
 		if err != nil {
-			logger.Panic(err.Error(), "Delete About", v.ID)
+			http.Error(w, "", http.StatusBadRequest)
+			return
 		}
 
 		// Response

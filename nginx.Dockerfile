@@ -1,5 +1,5 @@
 FROM node:13-alpine AS builder
-WORKDIR /build
+WORKDIR /build/app
 COPY ./web .
 # Disable sourcemaps to fix issue:
 # FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
@@ -10,5 +10,5 @@ RUN yarn build
 # Production build
 FROM nginx:mainline-alpine
 WORKDIR /home/app
-COPY ./deployments/nginx/default.conf.template /etc/nginx/conf.d/default.conf.template
-COPY --from=builder /build .
+COPY ./deployments/nginx/default.prod.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /build/app .

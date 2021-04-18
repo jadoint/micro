@@ -13,11 +13,11 @@ import (
 func SendMsg(topic string, msg []byte) {
 	kafkaServer := os.Getenv("KAFKA_SERVER")
 	if kafkaServer == "" {
-		logger.LogError(errors.New("KAFKA_SERVER is not set"))
+		logger.Log(errors.New("KAFKA_SERVER is not set"))
 		return
 	}
 	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": kafkaServer})
-	logger.LogError(err)
+	logger.Log(err)
 
 	defer p.Close()
 
@@ -27,7 +27,7 @@ func SendMsg(topic string, msg []byte) {
 			switch ev := e.(type) {
 			case *kafka.Message:
 				if ev.TopicPartition.Error != nil {
-					logger.LogError(fmt.Errorf("Delivery failed: %v", ev.TopicPartition))
+					logger.Log(fmt.Errorf("Delivery failed: %v", ev.TopicPartition))
 				} else {
 					fmt.Printf("Delivered message to %v\n", ev.TopicPartition)
 				}

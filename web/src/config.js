@@ -4,9 +4,9 @@ let authApiUrl = "https://www.davidado.com/api/v1/auth";
 let userApiUrl = "https://www.davidado.com/api/v1/user";
 let blogApiUrl = "https://www.davidado.com/api/v1/blog";
 if (hostname === "local.davidado.com") {
-  authApiUrl = "http://local.davidado.com/api/v1/auth";
-  userApiUrl = "http://local.davidado.com/api/v1/user";
-  blogApiUrl = "http://local.davidado.com/api/v1/blog";
+  authApiUrl = "https://local.davidado.com/api/v1/auth";
+  userApiUrl = "https://local.davidado.com/api/v1/user";
+  blogApiUrl = "https://local.davidado.com/api/v1/blog";
 }
 
 const pageTitle = "David Ado";

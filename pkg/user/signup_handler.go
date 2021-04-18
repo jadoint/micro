@@ -24,7 +24,11 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	}
 
 	isSignupRestricted, err := strconv.ParseBool(os.Getenv("SIGNUPS_RESTRICTED"))
-	logger.HandleError(err)
+	if err != nil {
+		logger.Log(err)
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 	if isSignupRestricted {
 		errutil.Send(w, "Signups no longer accepted", http.StatusForbidden)
 		return
@@ -35,7 +39,11 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	d.DisallowUnknownFields()
 	var ur Registration
 	err = d.Decode(&ur)
-	logger.HandleError(err)
+	if err != nil {
+		logger.Log(err)
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 
 	// Validation
 	err = validate.Struct(ur)
@@ -47,7 +55,11 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	// Verify Recaptcha token
 	rr := validateRecaptcha(ur.RecaptchaToken)
 	scoreThreshold, err := strconv.ParseFloat(os.Getenv("RECAPTCHA_SCORE_THRESHOLD"), 64)
-	logger.HandleError(err)
+	if err != nil {
+		logger.Log(err)
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 	if !rr.Success || rr.Score < scoreThreshold {
 		errutil.Send(w, "Unable to sign up due to captcha failure. Please refresh the page to try again.", http.StatusForbidden)
 		return
@@ -62,12 +74,19 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 
 	// Success: Add user
 	idUser, err := AddUser(clients, &ur, rr)
-	logger.HandleError(err)
+	if err != nil {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 
 	// JWT
 	dataClaim := visitor.GetVisitorTokenDataClaim(idUser, ur.Username)
 	tokenString, err := token.Create(dataClaim)
-	logger.HandleError(err)
+	if err != nil {
+		logger.Log(err)
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 
 	// Cookie
 	cookie.Add(w, os.Getenv("COOKIE_SESSION_NAME"), tokenString)
@@ -75,7 +94,11 @@ func signup(w http.ResponseWriter, r *http.Request, clients *conn.Clients) {
 	// Response
 	newUser := &User{ID: idUser, Username: ur.Username}
 	res, err := json.Marshal(newUser)
-	logger.HandleError(err)
+	if err != nil {
+		logger.Log(err)
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 
 	w.Write(res)
 }
@@ -87,7 +110,8 @@ func validateRecaptcha(token string) *RecaptchaResponse {
 	}
 	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", captchaFields)
 	if err != nil {
-		logger.Panic("Unable to verify reCaptcha token: %s", err.Error())
+		logger.Log(err, "Unable to verify reCaptcha token")
+		return nil
 	}
 	defer resp.Body.Close()
 
@@ -96,7 +120,10 @@ func validateRecaptcha(token string) *RecaptchaResponse {
 
 	var rr RecaptchaResponse
 	err = d.Decode(&rr)
-	logger.HandleError(err)
+	if err != nil {
+		logger.Log(err)
+		return nil
+	}
 
 	return &rr
 }

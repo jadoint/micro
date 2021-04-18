@@ -59,7 +59,9 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 			v.ID,
 		})
 		if err != nil {
-			logger.Panic(err.Error(), "Get Blog ID", idBlog)
+			logger.Log(err, "Get Blog ID: "+strconv.FormatInt(idBlog, 10))
+			http.Error(w, "", http.StatusBadRequest)
+			return
 		}
 
 		w.Write(res)
@@ -88,7 +90,9 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 
 		res, err := json.Marshal(struct{ *Blog }{b})
 		if err != nil {
-			logger.Panic(err.Error(), "Get Blog ID", idBlog)
+			logger.Log(err, "Get Blog ID: "+strconv.FormatInt(idBlog, 10))
+			http.Error(w, "", http.StatusBadRequest)
+			return
 		}
 
 		w.Write(res)
@@ -107,7 +111,11 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 
 		var b Blog
 		err := d.Decode(&b)
-		logger.HandleError(err)
+		if err != nil {
+			logger.Log(err)
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
 		b.IDAuthor = v.ID
 		// Strip title of all tags
 		strict := clean.Strict()
@@ -131,7 +139,8 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 		// Save
 		idBlog, err := Add(clients, &b)
 		if err != nil {
-			logger.Panic(err.Error(), "Add Blog ID", idBlog)
+			http.Error(w, "", http.StatusBadRequest)
+			return
 		}
 
 		res, err := json.Marshal(struct {
@@ -162,7 +171,11 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 
 		var b Blog
 		err = d.Decode(&b)
-		logger.HandleError(err)
+		if err != nil {
+			logger.Log(err)
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
 		b.ID = idBlog
 		b.IDAuthor = v.ID
 		// Strip title of all tags
@@ -188,7 +201,8 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 		// Save
 		err = Update(clients, &b)
 		if err != nil {
-			logger.Panic(err.Error(), "Update Blog ID", idBlog)
+			http.Error(w, "", http.StatusBadRequest)
+			return
 		}
 
 		res, err := json.Marshal(struct {
@@ -216,7 +230,8 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 		// Delete
 		err = Delete(clients, idBlog)
 		if err != nil {
-			logger.Panic(err.Error(), "Delete Blog ID", idBlog)
+			http.Error(w, "", http.StatusBadRequest)
+			return
 		}
 
 		res, err := json.Marshal(struct {
@@ -244,7 +259,9 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 			Views int64 `json:"views"`
 		}{views})
 		if err != nil {
-			logger.Panic(err.Error(), "Get Blog views", idBlog)
+			logger.Log(err, "Get Blog views: "+strconv.FormatInt(idBlog, 10))
+			http.Error(w, "", http.StatusBadRequest)
+			return
 		}
 
 		w.Write(res)
@@ -295,7 +312,9 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 			IDVisitor: v.ID,
 		})
 		if err != nil {
-			logger.Panic(err.Error(), "Latest blogs")
+			logger.Log(err, "Latest blogs")
+			http.Error(w, "", http.StatusBadRequest)
+			return
 		}
 
 		w.Write(res)
@@ -325,7 +344,9 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 			IDVisitor: v.ID,
 		})
 		if err != nil {
-			logger.Panic(err.Error(), "Recent blogs by author ID", idAuthor)
+			logger.Log(err, "Recent blogs by author ID: "+strconv.FormatInt(idAuthor, 10))
+			http.Error(w, "", http.StatusBadRequest)
+			return
 		}
 
 		w.Write(res)
@@ -344,7 +365,11 @@ func RouteTag(clients *conn.Clients) chi.Router {
 		res, err := json.Marshal(struct {
 			FrequentTags []*string `json:"frequentTags,omitempty"`
 		}{tags})
-		logger.HandleError(err)
+		if err != nil {
+			logger.Log(err)
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
 		w.Write(res)
 	})
 
@@ -365,7 +390,11 @@ func RouteTag(clients *conn.Clients) chi.Router {
 		res, err := json.Marshal(struct {
 			Tags []string `json:"tags,omitempty"`
 		}{tags})
-		logger.HandleError(err)
+		if err != nil {
+			logger.Log(err)
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
 		w.Write(res)
 	})
 
@@ -391,7 +420,11 @@ func RouteTag(clients *conn.Clients) chi.Router {
 
 		var t Tag
 		err = d.Decode(&t)
-		logger.HandleError(err)
+		if err != nil {
+			logger.Log(err)
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
 
 		// Validation
 		err = t.Validate()

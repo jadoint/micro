@@ -15,6 +15,9 @@ type AppMessage struct {
 func MakeAppMsg(msg string) []byte {
 	am := &AppMessage{AppMsg: msg}
 	res, err := json.Marshal(am)
-	logger.HandleError(err)
+	if err != nil {
+		logger.Log(err)
+		return nil
+	}
 	return res
 }

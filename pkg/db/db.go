@@ -44,7 +44,7 @@ func (db *ClientDB) MakeCSV(query string, args ...interface{}) (string, error) {
 		err := rows.Scan(&id)
 		if err != nil {
 			if err != sql.ErrNoRows {
-				logger.HandleError(err)
+				logger.Log(err)
 			}
 			return "", err
 		}

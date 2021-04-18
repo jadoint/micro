@@ -6,7 +6,11 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
+
+	"go.elastic.co/ecszap"
+	"go.uber.org/zap"
 )
 
 type action int
@@ -16,6 +20,38 @@ const (
 	logFatal
 	logOnly
 )
+
+// Log logs error to Stdout
+func Log(err error, msg ...string) {
+	if err == nil {
+		return
+	}
+
+	// Docker hostname, caller location, error message
+	_, file, line, _ := runtime.Caller(1)
+	hostname, _ := os.Hostname()
+	if hostname == "" {
+		hostname = "go"
+	}
+	errMsg := hostname + "," + file + ": " + strconv.Itoa(line)
+	if len(msg) > 0 {
+		var sb strings.Builder
+		var msgLen int
+		for _, v := range msg {
+			msgLen, _ = sb.WriteString(" | " + v)
+		}
+		if msgLen > 0 {
+			errMsg = sb.String()
+		}
+	}
+
+	encoderConfig := ecszap.NewDefaultEncoderConfig()
+	core := ecszap.NewCore(encoderConfig, os.Stdout, zap.DebugLevel)
+	logger := zap.New(core, zap.AddCaller())
+	logger.Info(
+		errMsg,
+		zap.Error(err))
+}
 
 // Panic logs caller filename and line number and
 // sends an Internal Server error code to the user.

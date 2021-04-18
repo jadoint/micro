@@ -25,7 +25,11 @@ func newPassword(w http.ResponseWriter, r *http.Request, clients *conn.Clients) 
 
 	var pc PasswordChange
 	err := d.Decode(&pc)
-	logger.HandleError(err)
+	if err != nil {
+		logger.Log(err)
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 
 	// Validation
 	err = validate.Struct(pc)
@@ -37,7 +41,11 @@ func newPassword(w http.ResponseWriter, r *http.Request, clients *conn.Clients) 
 	// Authentication
 	u, _ := GetUserByUsername(clients, v.Name)
 	isMatchingPasswords, err := hash.VerifyPassword(pc.OldPassword, u.Password)
-	logger.HandleError(err)
+	if err != nil {
+		logger.Log(err)
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 	if !isMatchingPasswords {
 		errutil.Send(w, "Password is incorrect", http.StatusForbidden)
 		return
@@ -50,7 +58,11 @@ func newPassword(w http.ResponseWriter, r *http.Request, clients *conn.Clients) 
 	res, err := json.Marshal(struct {
 		ID int64 `json:"id"`
 	}{v.ID})
-	logger.HandleError(err)
+	if err != nil {
+		logger.Log(err)
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 
 	w.Write(res)
 }

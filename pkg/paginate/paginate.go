@@ -33,7 +33,7 @@ func GetPageNum(r *http.Request) int {
 
 	pageNum, err := strconv.Atoi(pageNumParam)
 	if err != nil {
-		logger.LogError(err)
+		logger.Log(err)
 		return 1
 	}
 	if pageNum <= 0 {

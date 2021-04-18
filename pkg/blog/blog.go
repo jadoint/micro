@@ -62,7 +62,7 @@ func GetLatest(clients *conn.Clients, pageNum int, pageSize int) ([]*Blog, error
 			&b.WordCount, &b.Created, &b.Modified, &t.Tags)
 		if err != nil {
 			if err != sql.ErrNoRows {
-				logger.HandleError(err)
+				logger.Log(err)
 			}
 			return nil, err
 		}
@@ -113,7 +113,7 @@ func GetLatestByTag(clients *conn.Clients, tag string, pageNum int, pageSize int
 			&b.WordCount, &b.Created, &b.Modified, &t.Tags)
 		if err != nil {
 			if err != sql.ErrNoRows {
-				logger.HandleError(err)
+				logger.Log(err)
 			}
 			return nil, err
 		}
@@ -156,7 +156,7 @@ func GetRecentAuthorBlogs(clients *conn.Clients, idAuthor int64) ([]*Blog, error
 		err := rows.Scan(&b.ID, &b.Title)
 		if err != nil {
 			if err != sql.ErrNoRows {
-				logger.HandleError(err)
+				logger.Log(err)
 			}
 			return nil, err
 		}
@@ -185,7 +185,7 @@ func Get(clients *conn.Clients, idBlog int64) (*Blog, error) {
 			&b.Created, &b.Modified, &b.IsUnlisted, &b.IsDraft)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.HandleError(err)
+			logger.Log(err)
 		}
 		return &b, err
 	}
@@ -209,7 +209,7 @@ func GetPostInit(clients *conn.Clients, idBlog int64) (*Blog, error) {
 			&b.IsUnlisted, &b.IsDraft)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.HandleError(err)
+			logger.Log(err)
 		}
 		return &b, err
 	}
@@ -230,7 +230,7 @@ func GetPost(clients *conn.Clients, idBlog int64) (*Blog, error) {
 			&b.Created, &b.Modified)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.HandleError(err)
+			logger.Log(err)
 		}
 		return &b, err
 	}
@@ -250,7 +250,7 @@ func GetIDAuthor(clients *conn.Clients, idBlog int64) (int64, error) {
 		Scan(&idAuthor)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.HandleError(err)
+			logger.Log(err)
 		}
 		return idAuthor, err
 	}
@@ -265,6 +265,7 @@ func Add(clients *conn.Clients, b *Blog) (int64, error) {
 		VALUES(?, ?, ?, ?)`,
 		b.IDAuthor, b.Title, b.Post, b.WordCount)
 	if err != nil {
+		logger.Log(err)
 		return 0, err
 	}
 	idBlog, err := res.LastInsertId()
@@ -274,7 +275,10 @@ func Add(clients *conn.Clients, b *Blog) (int64, error) {
 	b.ID = idBlog
 
 	// Settings
-	go UpdateSettings(clients, b)
+	err = UpdateSettings(clients, b)
+	if err != nil {
+		return 0, err
+	}
 
 	return idBlog, nil
 }
@@ -288,17 +292,21 @@ func Update(clients *conn.Clients, b *Blog) error {
 		LIMIT 1`,
 		b.Title, b.Post, b.WordCount, b.Modified, b.ID)
 	if err != nil {
+		logger.Log(err)
 		return err
 	}
 
 	// Settings
-	go UpdateSettings(clients, b)
+	err = UpdateSettings(clients, b)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 // UpdateSettings saves blog settings
-func UpdateSettings(clients *conn.Clients, b *Blog) {
+func UpdateSettings(clients *conn.Clients, b *Blog) error {
 	_, err := clients.DB.Exec(`
 		UPDATE blog_settings
 		SET is_unlisted = ?, is_draft = ?
@@ -306,8 +314,12 @@ func UpdateSettings(clients *conn.Clients, b *Blog) {
 		LIMIT 1`,
 		b.IsUnlisted, b.IsDraft, b.ID)
 	if err != nil {
-		logger.Panic("UpdateSettings() failed to save")
+		if err != sql.ErrNoRows {
+			logger.Log(err)
+		}
+		return err
 	}
+	return nil
 }
 
 // Delete delete blog post
@@ -318,6 +330,7 @@ func Delete(clients *conn.Clients, idBlog int64) error {
 		LIMIT 1`,
 		idBlog)
 	if err != nil {
+		logger.Log(err)
 		return err
 	}
 	return nil
@@ -336,7 +349,7 @@ func GetViews(clients *conn.Clients, idBlog int64) (int64, error) {
 		Scan(&views)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			logger.HandleError(err)
+			logger.Log(err)
 		}
 		return 0, err
 	}
@@ -379,7 +392,10 @@ func IncrViews(clients *conn.Clients, idBlog int64) (int64, error) {
 			WHERE id_blog = ?
 			LIMIT 1`, idBlog)
 		if err != nil {
-			logger.Panic("IncrViews() failed to save")
+			if err != sql.ErrNoRows {
+				logger.Log(err)
+			}
+			return 0, err
 		}
 	}
 

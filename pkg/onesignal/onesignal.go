@@ -3,6 +3,7 @@ package onesignal
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -38,7 +39,8 @@ type Fields struct {
 func NotifyDevice(cfg *Config) {
 	appID := os.Getenv("ONESIGNAL_APPID")
 	if appID == "" {
-		logger.Fatal("ONESIGNAL_APPID not set in onesignal")
+		logger.Log(errors.New("ONESIGNAL_APPID not set in onesignal"))
+		return
 	}
 
 	fields := &Fields{
@@ -54,17 +56,20 @@ func NotifyDevice(cfg *Config) {
 
 	res, err := json.Marshal(fields)
 	if err != nil {
-		logger.Panic(err.Error(), "NotifyDevice", cfg.DeviceID)
+		logger.Log(errors.New("NotifyDevice: " + cfg.DeviceID))
+		return
 	}
 
 	apiURL := os.Getenv("ONESIGNAL_URL")
 	if apiURL == "" {
-		logger.Fatal("ONESIGNAL_URL not set in onesignal")
+		logger.Log(errors.New("ONESIGNAL_URL not set in onesignal"))
+		return
 	}
 
 	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(res))
 	if err != nil {
-		logger.Panic(err.Error(), "NotifyDevice NewRequest")
+		logger.Log(err, "NotifyDevice NewRequest")
+		return
 	}
 	token := os.Getenv("ONESIGNAL_TOKEN")
 	if token != "" {

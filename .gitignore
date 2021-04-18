@@ -39,7 +39,8 @@ docker-stack.yml
 docker-swarm-deploy.sh
 docker-swarm-init-deploy.sh
 
-# Ignore TLS files
+# Ignore sensitive files
+private/*
 *.key
 *.crt
 *.pem
