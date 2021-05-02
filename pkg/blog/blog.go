@@ -47,6 +47,9 @@ func GetLatest(clients *conn.Clients, pageNum int, pageSize int) ([]*Blog, error
 		LIMIT ?, ?
 		# GetLatest`, offset, pageSize)
 	if err != nil {
+		if err != sql.ErrNoRows {
+			logger.Log(err)
+		}
 		return nil, err
 	}
 	defer rows.Close()
@@ -98,6 +101,9 @@ func GetLatestByTag(clients *conn.Clients, tag string, pageNum int, pageSize int
 		LIMIT ?, ?
 		# GetLatest`, tag, offset, pageSize)
 	if err != nil {
+		if err != sql.ErrNoRows {
+			logger.Log(err)
+		}
 		return nil, err
 	}
 	defer rows.Close()
@@ -146,6 +152,9 @@ func GetRecentAuthorBlogs(clients *conn.Clients, idAuthor int64) ([]*Blog, error
 		LIMIT 5
 		# GetRecentAuthorBlogs`, idAuthor)
 	if err != nil {
+		if err != sql.ErrNoRows {
+			logger.Log(err)
+		}
 		return nil, err
 	}
 	defer rows.Close()

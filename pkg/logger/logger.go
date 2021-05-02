@@ -33,7 +33,7 @@ func Log(err error, msg ...string) {
 	if hostname == "" {
 		hostname = "go"
 	}
-	errMsg := hostname + "," + file + ": " + strconv.Itoa(line)
+	errMsg := hostname + "," + err.Error() + "," + file + ": " + strconv.Itoa(line)
 	if len(msg) > 0 {
 		var sb strings.Builder
 		var msgLen int
@@ -45,10 +45,32 @@ func Log(err error, msg ...string) {
 		}
 	}
 
+	// Save log to a file if enabled through
+	// a log directory environment variable.
+	logsDir := os.Getenv("LOGS_DIR")
+	var logFile *os.File
+	if logsDir != "" {
+		if _, err := os.Stat(logsDir); os.IsNotExist(err) {
+			os.Mkdir(logsDir, os.ModePerm)
+		}
+		t := time.Now()
+		filename := t.Format("2006-01-02") + ".log"
+		filepath := logsDir + "/" + filename
+		logFile, err = os.OpenFile(filepath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Print(err.Error())
+		}
+		defer logFile.Close()
+		log.SetOutput(logFile)
+	}
+	if logFile == nil {
+		logFile = os.Stdout
+	}
+
 	encoderConfig := ecszap.NewDefaultEncoderConfig()
-	core := ecszap.NewCore(encoderConfig, os.Stdout, zap.DebugLevel)
+	core := ecszap.NewCore(encoderConfig, logFile, zap.DebugLevel)
 	logger := zap.New(core, zap.AddCaller())
-	logger.Info(
+	logger.Error(
 		errMsg,
 		zap.Error(err))
 }

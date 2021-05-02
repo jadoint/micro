@@ -153,6 +153,9 @@ func GetUsernames(clients *conn.Clients, uids *IDs) ([]*Username, error) {
 		WHERE id_user IN (` + csvUserIds + `)
 		# GetUsernames`)
 	if err != nil {
+		if err != sql.ErrNoRows {
+			logger.Log(err)
+		}
 		return nil, err
 	}
 	defer rows.Close()
@@ -186,6 +189,7 @@ func AddUser(clients *conn.Clients, ur *Registration, rr *RecaptchaResponse) (in
 		VALUES(?, ?, ?)`,
 		ur.Username, passwordHash, ur.Email)
 	if err != nil {
+		logger.Log(err)
 		return 0, err
 	}
 	idUser, err := res.LastInsertId()
@@ -203,6 +207,7 @@ func AddUser(clients *conn.Clients, ur *Registration, rr *RecaptchaResponse) (in
 		VALUES(?, ?, ?, ?)`,
 		idUser, rr.Score, rr.Action, lastError)
 	if err != nil {
+		logger.Log(err)
 		return 0, err
 	}
 
@@ -223,6 +228,7 @@ func ChangePassword(clients *conn.Clients, idUser int64, newPassword string) err
 		LIMIT 1`,
 		passwordHash, idUser)
 	if err != nil {
+		logger.Log(err)
 		return err
 	}
 
