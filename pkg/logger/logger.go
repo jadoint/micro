@@ -45,10 +45,13 @@ func Log(err error, msg ...string) {
 		}
 	}
 
+	// List of where to print out logs
+	var outs []*os.File
+	outs = append(outs, os.Stdout)
+
 	// Save log to a file if enabled through
 	// a log directory environment variable.
 	logsDir := os.Getenv("LOGS_DIR")
-	var logFile *os.File
 	if logsDir != "" {
 		if _, err := os.Stat(logsDir); os.IsNotExist(err) {
 			os.Mkdir(logsDir, os.ModePerm)
@@ -56,23 +59,23 @@ func Log(err error, msg ...string) {
 		t := time.Now()
 		filename := t.Format("2006-01-02") + ".log"
 		filepath := logsDir + "/" + filename
-		logFile, err = os.OpenFile(filepath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+		logFile, err := os.OpenFile(filepath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Print(err.Error())
 		}
 		defer logFile.Close()
-		log.SetOutput(logFile)
-	}
-	if logFile == nil {
-		logFile = os.Stdout
+		outs = append(outs, logFile)
 	}
 
-	encoderConfig := ecszap.NewDefaultEncoderConfig()
-	core := ecszap.NewCore(encoderConfig, logFile, zap.DebugLevel)
-	logger := zap.New(core, zap.AddCaller())
-	logger.Error(
-		errMsg,
-		zap.Error(err))
+	for _, out := range outs {
+		log.SetOutput(out)
+		encoderConfig := ecszap.NewDefaultEncoderConfig()
+		core := ecszap.NewCore(encoderConfig, out, zap.DebugLevel)
+		logger := zap.New(core, zap.AddCaller())
+		logger.Error(
+			errMsg,
+			zap.Error(err))
+	}
 }
 
 // Panic logs caller filename and line number and
