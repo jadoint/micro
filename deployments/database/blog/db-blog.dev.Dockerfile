@@ -23,7 +23,7 @@ ENV MYSQL_DATABASE blog
 # Add the contents of the sql-scripts/ directory to your image.
 # All scripts in docker-entrypoint-initdb.d/ are automatically
 # executed during container startup.
-COPY ./sql-scripts/blog.sql /docker-entrypoint-initdb.d/blog.sql
+COPY ./sql-scripts/new-blog.sql /docker-entrypoint-initdb.d/new-blog.sql
 
 # Build this image.
 # docker build -t dockerhub_username/micro-blog:0.1 .

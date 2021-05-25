@@ -23,7 +23,7 @@ ENV MYSQL_DATABASE user
 # Add the contents of the sql-scripts/ directory to your image.
 # All scripts in docker-entrypoint-initdb.d/ are automatically
 # executed during container startup.
-COPY ./sql-scripts/user.sql /docker-entrypoint-initdb.d/user.sql
+COPY ./sql-scripts/new-user.sql /docker-entrypoint-initdb.d/new-user.sql
 
 # Build this image.
 # docker build -t dockerhub_username/micro-user:0.1 .

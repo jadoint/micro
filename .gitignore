@@ -44,3 +44,7 @@ private/*
 *.key
 *.crt
 *.pem
+
+# Ignore production sql files
+production-blog.sql
+production-user.sql
