@@ -141,7 +141,7 @@ func AddTag(clients *conn.Clients, idBlog int64, t *Tag) (int64, error) {
 	}
 	numTags := len(tags)
 	if numTags >= 20 {
-		return 0, errors.New("Limit of 20 tags reached")
+		return 0, errors.New("limit of 20 tags reached")
 	}
 	for _, v := range tags {
 		if v == t.Tag {

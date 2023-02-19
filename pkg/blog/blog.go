@@ -1,13 +1,14 @@
 package blog
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/go-redis/redis/v7"
+	"github.com/redis/go-redis/v9"
 	// Standard anonymous sql driver import
 	_ "github.com/go-sql-driver/mysql"
 
@@ -367,8 +368,9 @@ func GetViews(clients *conn.Clients, idBlog int64) (int64, error) {
 
 // IncrViews increments blog views
 func IncrViews(clients *conn.Clients, idBlog int64) (int64, error) {
+	ctx := context.Background()
 	bvKey := fmt.Sprintf("blog:views:%d", idBlog)
-	res := clients.Cache.Get(bvKey)
+	res := clients.Cache.Get(ctx, bvKey)
 	if res.Err() != nil && res.Err().Error() == redis.Nil.Error() {
 		// Not found in cache so check the database
 		views, err := GetViews(clients, idBlog)
@@ -381,7 +383,7 @@ func IncrViews(clients *conn.Clients, idBlog int64) (int64, error) {
 		if views == 0 {
 			views = 1
 		}
-		clients.Cache.IncrBy(bvKey, views)
+		clients.Cache.IncrBy(ctx, bvKey, views)
 
 		return views, nil
 	}
@@ -408,7 +410,7 @@ func IncrViews(clients *conn.Clients, idBlog int64) (int64, error) {
 		}
 	}
 
-	clients.Cache.Incr(bvKey)
+	clients.Cache.Incr(ctx, bvKey)
 
 	return views + 1, nil
 }

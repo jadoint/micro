@@ -143,7 +143,7 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 			return
 		}
 
-		res, err := json.Marshal(struct {
+		res, _ := json.Marshal(struct {
 			ID int64 `json:"idPost"`
 		}{idBlog})
 		w.Write(res)
@@ -205,7 +205,7 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 			return
 		}
 
-		res, err := json.Marshal(struct {
+		res, _ := json.Marshal(struct {
 			ID int64 `json:"idPost"`
 		}{idBlog})
 		w.Write(res)
@@ -234,7 +234,7 @@ func RouteBlog(clients *conn.Clients) chi.Router {
 			return
 		}
 
-		res, err := json.Marshal(struct {
+		res, _ := json.Marshal(struct {
 			ID int64 `json:"idPost"`
 		}{idBlog})
 		w.Write(res)
@@ -440,7 +440,7 @@ func RouteTag(clients *conn.Clients) chi.Router {
 			return
 		}
 
-		res, err := json.Marshal(struct {
+		res, _ := json.Marshal(struct {
 			ID int64 `json:"idTag"`
 		}{idTag})
 		w.Write(res)
@@ -470,7 +470,7 @@ func RouteTag(clients *conn.Clients) chi.Router {
 			return
 		}
 
-		res, err := json.Marshal(struct {
+		res, _ := json.Marshal(struct {
 			ID  int64  `json:"idPost"`
 			Tag string `json:"tag"`
 		}{idBlog, tag})

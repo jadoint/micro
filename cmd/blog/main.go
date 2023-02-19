@@ -13,7 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/go-redis/redis/v7"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/jadoint/micro/pkg/blog"
 	"github.com/jadoint/micro/pkg/conn"
