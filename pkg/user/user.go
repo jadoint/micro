@@ -142,7 +142,7 @@ func GetUsernames(clients *conn.Clients, uids *IDs) ([]*Username, error) {
 		csvUserIds += fmt.Sprintf(",'%s'", id)
 	}
 	if len(csvUserIds) == 0 {
-		return nil, errors.New("No results found")
+		return nil, errors.New("no results found")
 	}
 	csvUserIds = csvUserIds[1:]
 

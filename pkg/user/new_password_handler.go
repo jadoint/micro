@@ -52,7 +52,7 @@ func newPassword(w http.ResponseWriter, r *http.Request, clients *conn.Clients) 
 	}
 
 	// Save new password
-	err = ChangePassword(clients, v.ID, pc.NewPassword)
+	_ = ChangePassword(clients, v.ID, pc.NewPassword)
 
 	// Response
 	res, err := json.Marshal(struct {

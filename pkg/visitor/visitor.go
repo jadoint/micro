@@ -3,7 +3,7 @@ package visitor
 import (
 	"net/http"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/jadoint/micro/pkg/contextkey"
 	"github.com/jadoint/micro/pkg/token"
 )

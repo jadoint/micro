@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v7"
 	// Standard anonymous sql driver import
 	_ "github.com/go-sql-driver/mysql"
 

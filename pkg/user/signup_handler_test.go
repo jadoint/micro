@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -109,7 +109,7 @@ func TestSignupBadUsername(t *testing.T) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Errorf("TestSignupBadUsername failed with error: %s", err.Error())
 	}
@@ -137,7 +137,7 @@ func TestSignupBadPassword(t *testing.T) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Errorf("TestSignupBadPassword failed with error: %s", err.Error())
 	}
@@ -165,7 +165,7 @@ func TestSignupBadEmail(t *testing.T) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Errorf("TestSignupBadEmail failed with error: %s", err.Error())
 	}
@@ -201,7 +201,7 @@ func TestSignupAlreadyLoggedIn(t *testing.T) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Errorf("TestSignupAlreadyLoggedIn failed with error: %s", err.Error())
 	}

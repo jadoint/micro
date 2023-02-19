@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -72,7 +72,7 @@ func TestLoginBadPassword(t *testing.T) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Errorf("TestLoginBadPassword failed with error: %s", err.Error())
 	}
@@ -99,7 +99,7 @@ func TestLoginBadUsername(t *testing.T) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Errorf("TestLoginBadUsername failed with error: %s", err.Error())
 	}
@@ -134,7 +134,7 @@ func TestLoginAlreadyLoggedIn(t *testing.T) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Errorf("TestLoginAlreadyLoggedIn failed with error: %s", err.Error())
 	}

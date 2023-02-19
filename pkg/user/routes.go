@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/didip/tollbooth"
-	"github.com/didip/tollbooth/limiter"
+	"github.com/didip/tollbooth/v7"
+	"github.com/didip/tollbooth/v7/limiter"
 	"github.com/didip/tollbooth_chi"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 
 	"github.com/jadoint/micro/pkg/clean"
 	"github.com/jadoint/micro/pkg/conn"
@@ -215,7 +215,7 @@ func RouteUser(clients *conn.Clients) chi.Router {
 		}
 
 		// Response
-		res, err := json.Marshal(struct {
+		res, _ := json.Marshal(struct {
 			ID int64 `json:"idUser"`
 		}{idUser})
 		w.Write(res)
@@ -244,7 +244,7 @@ func RouteUser(clients *conn.Clients) chi.Router {
 		}
 
 		// Response
-		res, err := json.Marshal(struct {
+		res, _ := json.Marshal(struct {
 			ID int64 `json:"idUser"`
 		}{idUser})
 		w.Write(res)
